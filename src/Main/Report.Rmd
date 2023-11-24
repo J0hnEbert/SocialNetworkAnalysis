@@ -1,0 +1,484 @@
+# Social Network Analysis Report on Wine Review Data
+
+## Data Exploration
+
+```{r}
+# loading the data and assigning the date to the working Dataframe
+library(readr)
+library(dplyr)
+library(igraph)
+winemag_data_130k_v2 <- read_csv("/Users/john-thomas/Desktop/UNI/SNA/SocialNetworkAnalysis/src/Main/Data/archive/winemag-data-130k-v2.csv",show_col_types = FALSE)
+df <- winemag_data_130k_v2
+```
+
+```{r}
+# lets take a first look at the Dataset by checking the first 10 columns
+head(df)
+```
+
+```{r}
+df_Countries <- unique(na.omit(df['country']))
+```
+
+```{r}
+
+# Countries in Asia
+asia_countries <- c(
+  "Afghanistan", "Armenia", "Azerbaijan", "Bahrain", "Bangladesh", "Bhutan", 
+  "Brunei", "Cambodia", "China", "Cyprus", "Georgia", "India", "Indonesia", 
+  "Iran", "Iraq", "Israel", "Japan", "Jordan", "Kazakhstan", "Kuwait", 
+  "Kyrgyzstan", "Laos", "Lebanon", "Malaysia", "Maldives", "Mongolia", 
+  "Myanmar", "Nepal", "North Korea", "Oman", "Pakistan", "Palestine", 
+  "Philippines", "Qatar", "Saudi Arabia", "Singapore", "South Korea", 
+  "Sri Lanka", "Syria", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste", 
+  "Turkey", "Turkmenistan", "United Arab Emirates", "Uzbekistan", 
+  "Vietnam", "Yemen"
+)
+
+# Countries in Europe
+europe_countries <- c(
+  "Albania", "Andorra", "Austria", "Belarus", "Belgium", 
+  "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Cyprus", 
+  "Czech Republic", "Denmark", "Estonia", "Finland", "France", 
+  "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", 
+  "Kosovo", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", 
+  "Malta", "Moldova", "Monaco", "Montenegro", "Netherlands", 
+  "Macedonia", "Norway", "Poland", "Portugal", "Romania", 
+  "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia", 
+  "Spain", "Sweden", "Switzerland", "Ukraine", "England", 
+  "Vatican City"
+)
+
+# Countries in Africa
+africa_countries <- c(
+  "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", 
+  "Cabo Verde", "Cameroon", "Central African Republic", "Chad", 
+  "Comoros", "Democratic Republic of the Congo", "Djibouti", "Egypt", 
+  "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", 
+  "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast", 
+  "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", 
+  "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", 
+  "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", 
+  "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", 
+  "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", 
+  "Zambia", "Zimbabwe"
+)
+
+# Countries in North America
+north_america_countries <- c(
+  "Canada", "US", "Mexico", "Guatemala", "Honduras", 
+  "El Salvador", "Nicaragua", "Costa Rica", "Panama", "Belize", 
+  "Cuba", "Jamaica", "Haiti", "Dominican Republic", "Puerto Rico", 
+  "Bahamas", "Trinidad and Tobago", "Barbados", "Saint Lucia", 
+  "Grenada", "Antigua and Barbuda", "Saint Vincent and the Grenadines", 
+  "Saint Kitts and Nevis"
+)
+
+# Countries in South America
+south_america_countries <- c(
+  "Argentina", "Brazil", "Chile", "Colombia", "Ecuador", "Peru", 
+  "Bolivia", "Paraguay", "Uruguay", "Venezuela", "Guyana", "Suriname", 
+  "French Guiana", "Falkland Islands"
+)
+
+# Countries in Oceania
+oceania_countries <- c(
+  "Australia", "New Zealand", "Fiji", "Papua New Guinea", 
+  "Solomon Islands", "Vanuatu", "New Caledonia", "French Polynesia", 
+  "Samoa", "Tonga", "Kiribati", "Tuvalu", "Micronesia", 
+  "Marshall Islands", "Palau", "Nauru"
+)
+#South America
+df_SA <- df[df$country %in% south_america_countries,]
+df_SA_wines_by_country <- as.data.frame(table(df_SA$country))
+df_SA_wines_by_country <- df_SA_wines_by_country[order(-df_SA_wines_by_country$Freq),]
+
+#Europe
+df_EU <- df[df$country %in% europe_countries,]
+df_EU_wines_by_country <- as.data.frame(table(df_EU$country))
+df_EU_wines_by_country <- df_EU_wines_by_country[order(-df_EU_wines_by_country$Freq),]
+
+#North America
+df_NA <- df[df$country %in% north_america_countries,]
+df_NA_wines_by_country <- as.data.frame(table(df_NA$country))
+df_NA_wines_by_country <- df_NA_wines_by_country[order(-df_NA_wines_by_country$Freq),]
+
+#Africa
+df_AF <- df[df$country %in% africa_countries,]
+df_AF_wines_by_country <- as.data.frame(table(df_AF$country))
+df_AF_wines_by_country <- df_AF_wines_by_country[order(-df_AF_wines_by_country$Freq),]
+
+# Ociania
+df_OZ <- df[df$country %in% oceania_countries,]
+df_OZ_wines_by_country <- as.data.frame(table(df_OZ$country))
+df_OZ_wines_by_country <- df_OZ_wines_by_country[order(-df_OZ_wines_by_country$Freq),]
+
+#Asia
+df_AS <- df[df$country %in% asia_countries,]
+df_AS_wines_by_country <- as.data.frame(table(df_AS$country))
+df_AS_wines_by_country <- df_AS_wines_by_country[order(-df_AS_wines_by_country$Freq),]
+
+#renaming the columns
+df_SA_wines_by_country <- df_SA_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_EU_wines_by_country <- df_EU_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_NA_wines_by_country <- df_NA_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_AF_wines_by_country <- df_AF_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_OZ_wines_by_country <- df_OZ_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_AS_wines_by_country <- df_AS_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+
+
+```
+
+```{r}
+
+adj_SA <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i<-nrow(df_SA_wines_by_country)
+z<-nrow(df_SA_wines_by_country)
+while (i>=0) {
+  
+  
+    country_1 = df_SA_wines_by_country[i,1]
+    
+    country_2 = df_SA_wines_by_country[z,1]
+    
+    adj = 
+      ifelse(      
+        ifelse(
+          df_SA_wines_by_country[z, 2] > df_SA_wines_by_country[i, 2],
+                 df_SA_wines_by_country[z, 2] / df_SA_wines_by_country[i, 2],
+                 df_SA_wines_by_country[i, 2] / df_SA_wines_by_country[z, 2]) > 1000,
+        0, 
+        ifelse(
+          df_SA_wines_by_country[z, 2] > df_SA_wines_by_country[i, 2],
+                 df_SA_wines_by_country[z, 2] / df_SA_wines_by_country[i, 2],
+                 df_SA_wines_by_country[i, 2] / df_SA_wines_by_country[z, 2])
+      )
+    
+ 
+
+adj_SA <- adj_SA %>% add_row(country_1,country_2,adj)
+    z = z-1
+  if(z == 0){
+    i = i-1
+    z = nrow(df_SA_wines_by_country)
+  }
+}
+graph_SA <- graph_from_data_frame(adj_SA, directed = FALSE)
+
+# Get the adjacency matrix
+adj_matrix_SA <- as.matrix(get.adjacency(graph_SA, attr = "adj", sparse = FALSE))
+
+
+graph_SA <- graph_from_adjacency_matrix(adj_matrix_SA, mode = "undirected", weighted = TRUE)
+layout = layout_with_kk(graph_SA)
+
+# Plot the graph
+plot(simplify(graph_SA), edge.label = E(graph_SA)$adj, main = "South America", layout = layout)
+```
+
+```{r}
+adj_EU <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i<-nrow(df_EU_wines_by_country)
+z<-nrow(df_EU_wines_by_country)
+while (i>=0) {
+  
+  
+    country_1 = df_EU_wines_by_country[i,1]
+    
+    country_2 = df_EU_wines_by_country[z,1]
+    
+    adj = 
+      ifelse(      
+        ifelse(
+          df_EU_wines_by_country[z, 2] > df_EU_wines_by_country[i, 2],
+                 df_EU_wines_by_country[z, 2] / df_EU_wines_by_country[i, 2],
+                 df_EU_wines_by_country[i, 2] / df_EU_wines_by_country[z, 2]) > 100000,
+        0, 
+        ifelse(
+          df_EU_wines_by_country[z, 2] > df_EU_wines_by_country[i, 2],
+                 df_EU_wines_by_country[z, 2] / df_EU_wines_by_country[i, 2],
+                 df_EU_wines_by_country[i, 2] / df_EU_wines_by_country[z, 2])
+      )
+    
+ 
+
+adj_EU <- adj_EU %>% add_row(country_1,country_2,adj)
+    z = z-1
+  if(z == 0){
+    i = i-1
+    z = nrow(df_EU_wines_by_country)
+  }
+}
+graph_EU <- graph_from_data_frame(na.omit(adj_EU), directed = FALSE)
+
+# Get the adjacency matrix
+adj_matrix_EU <- as.matrix(get.adjacency(graph_EU, attr = "adj", sparse = FALSE))
+
+graph_EU <- graph_from_adjacency_matrix(adj_matrix_EU, mode = "undirected", weighted = TRUE, diag = FALSE)
+layout <- layout_with_kk(graph_EU)
+
+# Plot the graph
+plot(simplify(graph_EU), edge.label = E(graph_EU)$adj, main = "Europe", layout=layout, vertex.size = 6)
+```
+
+
+```{r}
+adj_NA <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i<-nrow(df_NA_wines_by_country)
+z<-nrow(df_NA_wines_by_country)
+while (i>=0) {
+  
+  
+    country_1 = df_NA_wines_by_country[i,1]
+    
+    country_2 = df_NA_wines_by_country[z,1]
+    
+    adj = 
+      ifelse(      
+        ifelse(
+          df_NA_wines_by_country[z, 2] > df_NA_wines_by_country[i, 2],
+                 df_NA_wines_by_country[z, 2] / df_NA_wines_by_country[i, 2],
+                 df_NA_wines_by_country[i, 2] / df_NA_wines_by_country[z, 2]) > 1000,
+        0, 
+        ifelse(
+          df_NA_wines_by_country[z, 2] > df_NA_wines_by_country[i, 2],
+                 df_NA_wines_by_country[z, 2] / df_NA_wines_by_country[i, 2],
+                 df_NA_wines_by_country[i, 2] / df_NA_wines_by_country[z, 2])
+      )
+    
+ 
+
+adj_NA <- adj_NA %>% add_row(country_1,country_2,adj)
+    z = z-1
+  if(z == 0){
+    i = i-1
+    z = nrow(df_NA_wines_by_country)
+  }
+}
+graph_NA <- graph_from_data_frame(na.omit(adj_NA), directed = FALSE)
+
+# Get the adjacency matrix
+adj_matrix_NA <- as.matrix(get.adjacency(graph_NA, attr = "adj", sparse = FALSE))
+
+graph_NA <- graph_from_adjacency_matrix(adj_matrix_NA, mode = "undirected", weighted = TRUE, diag = FALSE)
+layout <- layout_with_lgl(graph_NA)
+
+# Plot the graph
+plot(simplify(graph_NA), edge.label = E(graph_NA)$adj, main = "North America", layout=layout, vertex.size = 6)
+```
+
+
+```{r}
+adj_AS <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i <- nrow(df_AS_wines_by_country)
+z <- nrow(df_AS_wines_by_country)
+
+adj_AS <- tibble()  # Initialize an empty tibble
+
+while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+
+  country_1 <- df_AS_wines_by_country[i, 1]
+  country_2 <- df_AS_wines_by_country[z, 1]
+
+  adj <- ifelse(
+    ifelse(df_AS_wines_by_country[z, 2] > df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[z, 2] / df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[i, 2] / df_AS_wines_by_country[z, 2]) > 100,
+    0,
+    ifelse(df_AS_wines_by_country[z, 2] > df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[z, 2] / df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[i, 2] / df_AS_wines_by_country[z, 2])
+  )
+
+  # Create a tibble with the values and add it to adj_AS
+  row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
+  adj_AS <- bind_rows(adj_AS, row_data)
+
+  z <- z - 1
+
+  if (z == 0) {
+    i <- i - 1
+    z <- i
+  }
+}
+
+graph_AS <- graph_from_data_frame(na.omit(adj_AS), directed = FALSE)
+
+# Get the adjacency matrix
+adj_matrix_AS <- as.matrix(get.adjacency(graph_AS, attr = "adj", sparse = FALSE))
+print(adj_matrix_AS)
+graph_AS <- graph_from_adjacency_matrix(adj_matrix_AS, mode = "directed", weighted = TRUE, diag = FALSE)
+layout <- layout_with_kk(graph_AS)
+print(get.edgelist(graph_AS))
+# Plot the graph
+plot(graph_AS, edge.label = E(graph_AS)$adj, main = "Asia", layout=layout, vertex.size = 6, edge.arrow.size = 0.2)
+```
+
+
+```{r}
+adj_AF <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i<-nrow(df_AF_wines_by_country)
+z<-nrow(df_AF_wines_by_country)
+while (i>=0) {
+  
+  
+    country_1 = df_AF_wines_by_country[i,1]
+    
+    country_2 = df_AF_wines_by_country[z,1]
+    
+    adj = 
+      ifelse(      
+        ifelse(
+          df_AF_wines_by_country[z, 2] > df_AF_wines_by_country[i, 2],
+                 df_AF_wines_by_country[z, 2] / df_AF_wines_by_country[i, 2],
+                 df_AF_wines_by_country[i, 2] / df_AF_wines_by_country[z, 2]) > 100,
+        0, 
+        ifelse(
+          df_AF_wines_by_country[z, 2] > df_AF_wines_by_country[i, 2],
+                 df_AF_wines_by_country[z, 2] / df_AF_wines_by_country[i, 2],
+                 df_AF_wines_by_country[i, 2] / df_AF_wines_by_country[z, 2])
+      )
+    
+ 
+
+adj_AF <- adj_AF %>% add_row(country_1,country_2,adj)
+    z = z-1
+  if(z == 0){
+    i = i-1
+    z = nrow(df_AF_wines_by_country)
+  }
+}
+graph_AF <- graph_from_data_frame(na.omit(adj_AF), directed = FALSE)
+
+# Get the adjacency matrix
+adj_matrix_AF <- as.matrix(get.adjacency(graph_AF, attr = "adj", sparse = FALSE))
+
+graph_AF <- graph_from_adjacency_matrix(adj_matrix_AF, mode = "undirected", weighted = TRUE, diag = FALSE)
+layout <- layout_with_kk(graph_AF)
+
+# Plot the graph
+plot(simplify(graph_AF), edge.label = E(graph_AF)$adj, main = "Africa", layout=layout, vertex.size = 6)
+```
+
+
+```{r}
+adj_OZ <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i<-nrow(df_OZ_wines_by_country)
+z<-nrow(df_OZ_wines_by_country)
+while (i>=0) {
+  
+  
+    country_1 = df_OZ_wines_by_country[i,1]
+    
+    country_2 = df_OZ_wines_by_country[z,1]
+    
+    adj = 
+      ifelse(      
+        ifelse(
+          df_OZ_wines_by_country[z, 2] > df_OZ_wines_by_country[i, 2],
+                 df_OZ_wines_by_country[z, 2] / df_OZ_wines_by_country[i, 2],
+                 df_OZ_wines_by_country[i, 2] / df_OZ_wines_by_country[z, 2]) > 1000,
+        0, 
+        ifelse(
+          df_OZ_wines_by_country[z, 2] > df_OZ_wines_by_country[i, 2],
+                 df_OZ_wines_by_country[z, 2] / df_OZ_wines_by_country[i, 2],
+                 df_OZ_wines_by_country[i, 2] / df_OZ_wines_by_country[z, 2])
+      )
+    
+ 
+
+adj_OZ <- adj_OZ %>% add_row(country_1,country_2,adj)
+    z = z-1
+  if(z == 0){
+    i = i-1
+    z = nrow(df_OZ_wines_by_country)
+  }
+}
+graph_OZ <- graph_from_data_frame(na.omit(adj_OZ), directed = FALSE)
+
+# Get the adjacency matrix
+adj_matrix_OZ <- as.matrix(get.adjacency(graph_OZ, attr = "adj", sparse = FALSE))
+
+graph_OZ <- graph_from_adjacency_matrix(adj_matrix_OZ, mode = "undirected", weighted = TRUE, diag = FALSE)
+layout <- layout_with_lgl(graph_OZ)
+
+# Plot the graph
+plot(simplify(graph_OZ), edge.label = E(graph_OZ)$adj, main = "Ociania", layout=layout, vertex.size = 6)
+```
+
+```{r}
+adj_AS <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i <- nrow(df_AS_wines_by_country)
+z <- nrow(df_AS_wines_by_country)
+
+adj_AS <- tibble()  # Initialize an empty tibble
+
+while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+
+  country_1 <- df_AS_wines_by_country[i, 1]
+  country_2 <- df_AS_wines_by_country[z, 1]
+
+  adj <- ifelse(
+    ifelse(df_AS_wines_by_country[z, 2] > df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[z, 2] / df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[i, 2] / df_AS_wines_by_country[z, 2]) > 100,
+    NA,
+    ifelse(df_AS_wines_by_country[z, 2] > df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[z, 2] / df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[i, 2] / df_AS_wines_by_country[z, 2])
+  )
+
+  # Create a tibble with the values and add it to adj_AS
+  row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
+  adj_AS <- bind_rows(adj_AS, row_data)
+
+  z <- z - 1
+
+  if (z == 0) {
+    i <- i - 1
+    z <- i
+  }
+}
+adj_AS <-na.omit(adj_AS)
+graph_AS <- graph.empty()
+
+graph_AS <- add_vertices(graph_AS, n = nrow(df_AS_wines_by_country), name = df_AS_wines_by_country$Country)
+vertex_names <- names(V(graph_AS))
+print(vertex_names)
+
+colors_AS <- tibble(Country=character(), Color=character())
+i <- nrow(df_AS_wines_by_country)
+
+while(i>0){
+  generate_random_color <- function() {
+  red <- runif(1)
+  green <- runif(1)
+  blue <- runif(1)
+  return(rgb(red, green, blue))
+  }
+  
+  Country <- df_AS_wines_by_country[i,1]
+  Color<-generate_random_color()
+  add_row(colors_AS,Country=character(),Color=character())
+  i <- i-1
+  row_data <- tibble(Country = Country, Color = Color)
+  colors_AS <- bind_rows(colors_AS, row_data)
+}
+
+i<-nrow(adj_AS)
+while (i > 0) {
+  graph_AS <- add_edges(graph_AS, edges = as.matrix(adj_AS[i, c("country_1", "country_2")]))
+  i <- i - 1
+  
+}
+
+layout = layout_with_kk(graph_AS)
+plot(simplify(graph_AS), edge.arrow.size = 0.3,layout = layout)
+```
