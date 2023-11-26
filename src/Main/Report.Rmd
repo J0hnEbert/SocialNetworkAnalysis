@@ -1,0 +1,743 @@
+---
+title: "Social Network Analysis Report on Wine Review Data"
+output: 
+  pdf_document: default
+---
+
+# Social Network Analysis Report on Wine Review Data
+
+## Einleitung und Forschungsfrage
+
+In der folgenden Arbeit wird der Datensatz "Wine Reviews"(<https://www.kaggle.com/datasets/zynicide/wine-reviews/data>) des Kaggle-Users "Zackthoutt" analysisert und behandelt. Der Datensatz wurde von der Website <https://www.wineenthusiast.com/> gescraped und durch "Zackthoutt" auf Kaggle bereitgestellt.
+
+Als Anreicherung wird weiterhin der Datensatz "wine-producing-countries-2023" der website: <https://worldpopulationreview.com/country-rankings/wine-producing-countries> verwendet. Dieser Datensatz enthält die Produktion von Wein aller Länder.
+
+Wein ist eines der ältesten und am weitesten verbreiteten alkoholischen Getränke weltweit. Mit einer ca. 8000 Jahren alten Geschichte hat sich rund um das Thema wein eine vielfälltige und komplex Kutur gebildet. Wein und seine Vielfalt hat auch mein persönliches Interesse geweckt weshalb ich diesen Report dem Thema der Bewertung von Wein sowie seiner Produktion widmen möchte.
+
+Die Fragen die dieser Report beantworten soll sind:
+
+1.  Welches Land stellt die meißten der bewerteten Weine?
+2.  Welches Land bekommt durchschnittlich die besten bewertungen?
+3.  Welches Land hat das beste Preis-Punkte-Verhältis?
+4.  Stimmt die Verteilung der bewerteten Weine mit der weltweiten Produktion (je Land) von Wein überein?
+5.  In welcher Relationen stehen die länder in Bezug auf die Anzahl der bewerteten Weine zueinander?
+
+## Analysestrategie
+
+Zur beantfortung der Fragen werden zuerst verschiedene Daten benötigt:
+
+-   Das Herkunftsland des Weines
+
+-   Der Name bzw. ein eindeutig zuzuweisender Parameter
+
+-   Die erhaltenen Punkte
+
+-   Der Preis
+
+-   Die Weinproduktion der jeweiligen Länder insgesammt
+
+-   Name des Testers
+
+Es gibt weiterhin Faktoren die aus den gegebenen Daten errechnet werden müsse:
+
+-   Die Anzahl der Weine je Land
+
+-   Der Durchschnitsspreis von weinen je Land sowie die Punkteanzahl
+
+-   Das Verhältnis des Preis- und Punktedurchschnits je Land
+
+-   Die Ähnlichkeit bzw. Relation der verschiedenen Länder im Bezug auf die Anzahl der Weine
+
+-   Die Anzahl der getesteten Weine je nach Tester und Land
+
+Der Großteil der Fragen lässt sich vor allem durch eine quantitative Datenanalyse beantworten, für Frage 4 ist es jedoch effektiver ein Netzwerk zu erstellen da dort die Relationen der länder Miteinander besser zur geltung kommen, des weiteren können so Cluster identifiziert werden welche weitere Rückschlüsse erlauben. Auch Frage 6 ist mit einem Netzwerk am besten zu veranschaulichen.
+
+## Analyse des Datensatzes
+
+### Data Exploration & Cleaning
+
+Zuerst muss der Datensatz "winemag-data-130k-v2.csv" welcher die Daten für die Bewertungen der verschiedenen Weine enthält geladen werden. Ebenfalls wird der zweite Datensatz zur anreicherung geladen und formatiert.
+
+```{r message=FALSE, warning=FALSE}
+# setzen der benötigten Packages 
+library(readr)
+library(dplyr)
+library(igraph)
+library(ggplot2)
+library(gridExtra)
+# laden des Datensatzes
+winemag_data_130k_v2 <- read_csv("/Users/john-thomas/Desktop/UNI/SNA/SocialNetworkAnalysis/src/Main/Data/archive/winemag-data-130k-v2.csv",show_col_types = FALSE)
+# zuweisen des Datensatzes zu einem neue Data Frame zur weiterverarbeitung
+df <- winemag_data_130k_v2
+
+# zweiten Datensatz laden und umwandeln um ihn in der anschließenden Analyse Nutzen zu können
+wineproduction_data_2023 <- read.csv("/Users/john-thomas/Desktop/UNI/SNA/wine-producing-countries-2023.csv")
+df_wine_prod <- na.omit(select(wineproduction_data_2023, country, wineProducingCountries_wineProduction))
+```
+
+```{r}
+# um einen ersten Überblick zu erhalten werden mit head(df,10) die ersten 10 Zeilen ausgegeben
+head(df,10)
+```
+
+Nachdem der Datensatz nun schonmal exemplarisch geladen ist, kann man sehen das dieser 14 verschiedene Spalten hat.
+
+Diese sind:
+
+-   country
+
+-   description
+
+-   designation
+
+-   points
+
+-   price
+
+-   province
+
+-   region_1
+
+-   region_2
+
+-   taster_name
+
+-   taster_twitter_handle
+
+-   tittle
+
+-   variety
+
+-   winery
+
+Für unsere Analyse verwenden wir jedoch nur die folgenden Spalten:
+
+-   country
+
+-   points
+
+-   price
+
+-   taster_name
+
+### Frage 1 - Welches Land stellt die meisten der bewerteten Weine?
+
+Um herrauszufinden welches Land die meisten Weine in der Bewertung stellt müssen wir zuerst die Spalten "country" sowie "title" aus dem Haupt Dataframe (df) extrahieren. Nun können die Weine je nach Land aufsummiert werden und in einem Balkendiagramm veranschaulicht werden.
+
+```{r}
+# Neuen Dataframe mit den Spalten "country" und "title" bilden
+df_WW <- na.omit(select(df, country, title))
+# Anzahl der Einträge je Land zählen 
+df_WW_wines_by_country <- as.data.frame(table(df_WW$country))
+# Dataframe absteigend sortieren
+df_WW_wines_by_country <- df_WW_wines_by_country[order(-df_WW_wines_by_country$Freq),]
+
+# Plot der Top 10 Länder erstellen um die prominenteste Nation zu finden
+ggplot(df_WW_wines_by_country[1:10,], aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Herkunftsländer bewerteter Weine", x = "Land", y = "Anzahl")
+# Name des Landes und Anzahl der weine ausgeben
+print(df_WW_wines_by_country)
+
+```
+
+Nachdem man das Diagram sowei die Ausgabe aus der Kosole betrachtet, sieht man das die USA mit: 54504 das Land sind welche die meisten Weine Stellen.
+
+### Frage 2 - Welches Land bekommt durchschnittlich die besten bewertungen?
+
+Um zu errechnen welches Land durschnittlich die beste Punktzahl erhält müssen wir zuerts einen Dataframe erzeugen welcher die Spalten: "country", "points" und "title" enthält.
+
+```{r}
+# Erzeugen des Dataframes
+df_WW_points <- na.omit(select(df, country,points,title))
+df_WW_wines_by_country <- df_WW_wines_by_country[order(df_WW_wines_by_country$Var1),]
+# Aggregation der Werte sowie die Berechnung der Durchschnittlichen Punkte Anzahl
+df_WW_points_avg <- aggregate(df_WW_points$points, list(df_WW_points$country), FUN=mean)
+# Alphabetisches Sortieren des DF
+df_WW_points_avg <- df_WW_points_avg[order(df_WW_points_avg$Group.1),]
+# visualisiserung der Verteilung der Punktedurchschnitte
+boxplot(df_WW_points_avg$x)
+```
+
+Durch diesen Boxplot kann man sehen das der Durchschnitt der durschnittlichen Punktezahl bei ca. 87.65 liegt, es gibt weiterhin outlier die von \<84 bis \>90 liegen. Um dies besser zu veranschaulichen bedarf es jedoch einer anderen Visualisierungsform wie beispielsweise einem Balkendiagramm.
+
+```{r}
+ggplot(df_WW_points_avg[1:10,], aes(x = Group.1, y = x)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Herkunftsländer bewerteter Weine", x = "Land", y = "Durschnittliche Punkte")
+# Absteigend sortieren und ausgeben des DF
+print(head(df_WW_points_avg[order(-df_WW_points_avg$x),],20))
+```
+
+Nun ist zu erkennen das nachdem man das Balkendiagram sowie die Ausgabe in der Konsole betrachtet das England das Land mit der höchsten durschnittlichen punktzahl ist. Hierbei ist es nun jedoch wichtig zu betrachten das dieser Wert wohlmöglich aufgrund der relativ niedriegen Anzahl der aus England stammenden bewerteten Weine verzehrt ist. Um nun zu betrachten wie sehr sich die Punktzahlen um den Durschnitt streuen betrachten wir außerdem den Standartfehler (SEM) dieser zeigt uns welche abweichung vom Durschnitt zu erwarten sind.
+
+```{r}
+# Standardtabweichnung berechnene
+df_WW_points_SEM <- aggregate(df_WW_points$points, list(df_WW_points$country), FUN=sd)
+# SEM berechnen
+df_WW_points_SEM$x <- df_WW_points_SEM$x / sqrt(df_WW_wines_by_country$Freq)
+#DF absteigend sortieren
+df_WW_points_SEM <- df_WW_points_SEM[order(df_WW_points_SEM$x),]
+# Balkendiagramm der top 10 erstellen 
+ggplot(df_WW_points_SEM[1:10,], aes(x = Group.1, y = x)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Durchschnittliche", x = "Land", y = "Durchschnittliche Abweichung")
+print(head(df_WW_points_SEM))
+```
+
+Ziehen wir nun mit in betracht das auch eine geringe Abweichung der gegebenen Werte vom Durchschnitt eine wichte Rolle spielt so können wir feststellen das die USA das Land sind bei welchem die geringste Abweichung von der Durschnittlichen Punkte zu erwarten ist.
+
+Um die Frage zu beantworten "Welches Land bekommt durschnittlich die besten Bewertungen?" kann man also sagen das zwar England das Land mit dem höchsten durschnittlichen Score ist (91,581) jedoch die USA das Land sind bei welchem es die niedrigste zu erwartende Streuung vom Durschnitt gibt (0.0133).
+
+### Frage 3 - Welches Land hat das beste Punkte-Preis-Verhältnis?
+
+Um nun festzustellen welche Land das beste Preis zu Punkte Verhältnis hat werden wir den durschnittlichen Preis errechnene und dann durch die durschnittlichen Punkte teilen.
+
+```{r}
+# erstellen des bebötigten DF zur berechnung des Durschnittspreis
+df_WW_price <- select(df, country, price)
+df_WW_price$price[is.na(df_WW_price$price)] <-0.0
+# berechnung des Durschnittspreis
+df_WW_price_avg <- aggregate(df_WW_price$price, list(df_WW_price$country), FUN=mean)
+df_WW_price_avg <- df_WW_price_avg[order(df_WW_price_avg$Group.1),]
+# erstellen der neuen Spalte für das Preis-Punkte-Verhältnis
+df_WW_price_avg$PPV <- df_WW_points_avg$x / df_WW_price_avg$x
+# sortieren nach PPV
+df_WW_price_avg <- df_WW_price_avg[order(-df_WW_price_avg$PPV),]
+
+# visualisieren der Ergebnisse sowie ausgabe in die Konsole
+boxplot(df_WW_price_avg$PPV)
+print(df_WW_price_avg)
+```
+
+Wir können nun sehen das die Ukraine das Land ist wessen Weine das beste Punkte-Preis-Verhältnis aufweisen (9,124), hierbei ist jedoch erneut zu beachten das die Sample Size eine wichtige rolle Spielt und möglicherweise das Ergebnis verzehrt. Das schlechteste Verhältnis hat die Schweiz mit ca. 1,039. Der durschnittliche Score liegt bei ca. 3,8.
+
+### Frage 4 - Stimmt die Verteilung der bewerteten Weine mit der weltweiten Produktion (je Land) von Wein überein?
+
+Um herrauszufinden ob die Herkunft der bewerteten Weine mit der Produktion von wein zusammenhängt verwenden wir hier einen 2. Datensatz welcher die weltweite Produktion von Wein abbildet.
+
+Zuerst müssen wir nun die Verteilung der weltweiten Weinporduktion betrachten und danach mit der Anzahl der bewerteten Weine vergleichen.
+
+```{r}
+# festlegen der Zahlennotation
+options(scipen = 999)
+# Berechnen der Anteile der verschiedenen Länder an der weltweiten Weinproduktion in Prozent
+df_wine_prod$percent <- df_wine_prod$wineProducingCountries_wineProduction/sum(df_wine_prod$wineProducingCountries_wineProduction) * 100
+# Das selbe für die bewerteten Weine
+df_WW_wines_by_country$percent <-df_WW_wines_by_country$Freq / sum(df_WW_wines_by_country$Freq) * 100
+# DF sortieren
+df_wine_prod <- df_wine_prod[order(-df_wine_prod$percent),]
+df_WW_wines_by_country <- df_WW_wines_by_country[order(-df_WW_wines_by_country$percent),]
+
+# Kuchendiagramm für die weltweiten Daten
+pie_WW_prod <- ggplot(df_wine_prod[1:5,], aes(x = "", y = percent, fill = country)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y") +
+  theme_void() +
+  ggtitle("Anteile an der weltweiten Weinproduktion je Land")
+
+# Kuchendiagramm für die Weine aus dem Review-Datensatz
+pie_WW_set <- ggplot(df_WW_wines_by_country[1:5,], aes(x = "", y = percent, fill = Var1)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y") +
+  theme_void() +
+  ggtitle("Anteile der Weine im Datensatz je Land")
+
+grid.arrange(pie_WW_prod, pie_WW_set, ncol = 2)
+
+```
+
+Hier können wir nun beobachten das das Verhältnis der bewerteten Weine sich deutlich von dem der tatsächlichen weltweite Produktion unterscheidet. Diese Disparität kann vielerlei Gründe haben, zum einen ist das Magazin von welchem die Daten erhoben wurden Amerekanisch weshalb ein gewisser Bias in die Richtung zu erwarten war. Die anderen Unterschiede jedoch sind schwerer zu erklären wie zum Beispiel das Australien der weltweit fünft größte Weinproduzent ist jedoch bei den bewerteten Weinen nicht unter den Top 5 auftritt. Desweiteren werden anscheinend überproportional mehr Portugisische Weine bewertet als Portugal insgesammt anteilig produziert.
+
+### Frage 5 - In welcher Relationen stehen die Länder in Bezug auf die Anzahl der bewerteten Weine zueinander? 
+
+Um herrauszufinden in welcher Relation die verschiedenen Länder zueinander stehen, im Bezug auf den Anteil ihrer Weine im Datensatz müssen wir die Daten zuerst nach Kontinent sortieren um sie dann weiter zu verarbeiten. Dadurch das wir so viele verschiedene Länder und verbindungen haben ist es sinvoller Subnetze für die verschiednen Kontinente zu erstellen da so eine bessere übersicht herscht.
+
+```{r}
+# zuerst legen wir listen mit allen Länder je kontinent an um anschließend die Daten zu vergleichen, hierbei ist darauf zu achten das die Namen der Länder im Datensatz exact die selben wie in den Listen ist
+
+# Länder in Asien
+asia_countries <- c(
+  "Afghanistan", "Armenia", "Azerbaijan", "Bahrain", "Bangladesh", "Bhutan", 
+  "Brunei", "Cambodia", "China", "Cyprus", "Georgia", "India", "Indonesia", 
+  "Iran", "Iraq", "Israel", "Japan", "Jordan", "Kazakhstan", "Kuwait", 
+  "Kyrgyzstan", "Laos", "Lebanon", "Malaysia", "Maldives", "Mongolia", 
+  "Myanmar", "Nepal", "North Korea", "Oman", "Pakistan", "Palestine", 
+  "Philippines", "Qatar", "Saudi Arabia", "Singapore", "South Korea", 
+  "Sri Lanka", "Syria", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste", 
+  "Turkey", "Turkmenistan", "United Arab Emirates", "Uzbekistan", 
+  "Vietnam", "Yemen"
+)
+
+# Länder in Europa
+europe_countries <- c(
+  "Albania", "Andorra", "Austria", "Belarus", "Belgium", 
+  "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Cyprus", 
+  "Czech Republic", "Denmark", "Estonia", "Finland", "France", 
+  "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", 
+  "Kosovo", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", 
+  "Malta", "Moldova", "Monaco", "Montenegro", "Netherlands", 
+  "Macedonia", "Norway", "Poland", "Portugal", "Romania", 
+  "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia", 
+  "Spain", "Sweden", "Switzerland", "Ukraine", "England", 
+  "Vatican City"
+)
+
+# Länder in Afrika
+africa_countries <- c(
+  "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", 
+  "Cabo Verde", "Cameroon", "Central African Republic", "Chad", 
+  "Comoros", "Democratic Republic of the Congo", "Djibouti", "Egypt", 
+  "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", 
+  "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast", 
+  "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", 
+  "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", 
+  "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", 
+  "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", 
+  "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", 
+  "Zambia", "Zimbabwe"
+)
+
+# Länder in Nord Amerika
+north_america_countries <- c(
+  "Canada", "US", "Mexico", "Guatemala", "Honduras", 
+  "El Salvador", "Nicaragua", "Costa Rica", "Panama", "Belize", 
+  "Cuba", "Jamaica", "Haiti", "Dominican Republic", "Puerto Rico", 
+  "Bahamas", "Trinidad and Tobago", "Barbados", "Saint Lucia", 
+  "Grenada", "Antigua and Barbuda", "Saint Vincent and the Grenadines", 
+  "Saint Kitts and Nevis"
+)
+
+# Länder in Süd Amerika
+south_america_countries <- c(
+  "Argentina", "Brazil", "Chile", "Colombia", "Ecuador", "Peru", 
+  "Bolivia", "Paraguay", "Uruguay", "Venezuela", "Guyana", "Suriname", 
+  "French Guiana", "Falkland Islands"
+)
+
+# Länder in Ozianien
+oceania_countries <- c(
+  "Australia", "New Zealand", "Fiji", "Papua New Guinea", 
+  "Solomon Islands", "Vanuatu", "New Caledonia", "French Polynesia", 
+  "Samoa", "Tonga", "Kiribati", "Tuvalu", "Micronesia", 
+  "Marshall Islands", "Palau", "Nauru"
+)
+
+# zuerst werden die spalte country in df mit den länderlisten abgegleicht, trift die Kondition zu so werden sie dem jeweiligen neun Kontinenten df zugewiesen
+
+# Süd Amerika
+df_SA <- df[df$country %in% south_america_countries,]
+df_SA_wines_by_country <- as.data.frame(table(df_SA$country))
+df_SA_wines_by_country <- df_SA_wines_by_country[order(-df_SA_wines_by_country$Freq),]
+
+# Europa 
+df_EU <- df[df$country %in% europe_countries,]
+df_EU_wines_by_country <- as.data.frame(table(df_EU$country))
+df_EU_wines_by_country <- df_EU_wines_by_country[order(-df_EU_wines_by_country$Freq),]
+
+# Nord Amerika
+df_NA <- df[df$country %in% north_america_countries,]
+df_NA_wines_by_country <- as.data.frame(table(df_NA$country))
+df_NA_wines_by_country <- df_NA_wines_by_country[order(-df_NA_wines_by_country$Freq),]
+
+# Afrika
+df_AF <- df[df$country %in% africa_countries,]
+df_AF_wines_by_country <- as.data.frame(table(df_AF$country))
+df_AF_wines_by_country <- df_AF_wines_by_country[order(-df_AF_wines_by_country$Freq),]
+
+# Ozianien
+df_OZ <- df[df$country %in% oceania_countries,]
+df_OZ_wines_by_country <- as.data.frame(table(df_OZ$country))
+df_OZ_wines_by_country <- df_OZ_wines_by_country[order(-df_OZ_wines_by_country$Freq),]
+
+# Asien 
+df_AS <- df[df$country %in% asia_countries,]
+df_AS_wines_by_country <- as.data.frame(table(df_AS$country))
+df_AS_wines_by_country <- df_AS_wines_by_country[order(-df_AS_wines_by_country$Freq),]
+
+# hier werden nun die Spalten jeweils umbenannt um besser mit ihnen weiterarbeiten zu können 
+df_SA_wines_by_country <- df_SA_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_EU_wines_by_country <- df_EU_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_NA_wines_by_country <- df_NA_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_AF_wines_by_country <- df_AF_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_OZ_wines_by_country <- df_OZ_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+df_AS_wines_by_country <- df_AS_wines_by_country %>% rename(Country = Var1, Weight = Freq)
+
+
+```
+
+Der nächste Schritt ist nun die Graphen für die jeweiligen Kontinente zu erstellen. Das verfahren wird nun exemplarisch an Süd Amerika veranschaulicht, die anderen Graphen werden auf die exakt selbe Weise erstellt.
+
+```{r}
+# adjancy matrix erstellen
+adj_SA <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i <- nrow(df_SA_wines_by_country)
+z <- nrow(df_SA_wines_by_country)
+
+#adj_SA <- tibble()  
+
+while (i >= 1) {  
+
+  country_1 <- df_SA_wines_by_country[i, 1]
+  country_2 <- df_SA_wines_by_country[z, 1]
+
+  adj <- ifelse(
+    ifelse(df_SA_wines_by_country[z, 2] > df_SA_wines_by_country[i, 2],
+           df_SA_wines_by_country[z, 2] / df_SA_wines_by_country[i, 2],
+           df_SA_wines_by_country[i, 2] / df_SA_wines_by_country[z, 2]) > 10,
+    NA,
+    ifelse(df_SA_wines_by_country[z, 2] > df_SA_wines_by_country[i, 2],
+           df_SA_wines_by_country[z, 2] / df_SA_wines_by_country[i, 2],
+           df_SA_wines_by_country[i, 2] / df_SA_wines_by_country[z, 2])
+  )
+
+  # Create a tibble with the values and add it to adj_AS
+  row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
+  adj_SA <- bind_rows(adj_SA, row_data)
+
+  z <- z - 1
+
+  if (z == 0) {
+    i <- i - 1
+    z <- i
+  }
+}
+adj_SA <-na.omit(adj_SA)
+graph_SA <- graph.empty()
+
+vertex_size_SA <- tibble(Country = character(),Size = numeric())
+i <- nrow(df_SA_wines_by_country)
+while(i > 0){
+  Country = df_SA_wines_by_country[i,1]
+  Size <- ifelse(df_SA_wines_by_country[i,2]/100 > 2, (df_SA_wines_by_country[i,2]/1000)+7, 7)
+  add_row(vertex_size_SA, Country=character(), Size=numeric())
+  row_data <- tibble(Country=Country,Size=Size)
+  vertex_size_SA <- bind_rows(vertex_size_SA,row_data)
+  i <- i - 1
+  vertex_size_SA <- vertex_size_SA[order(vertex_size_SA$Size, decreasing = TRUE),]
+}
+
+graph_SA <- add_vertices(graph_SA, n = nrow(df_SA_wines_by_country), name = df_SA_wines_by_country$Country, size = vertex_size_SA$Size)
+
+i<-nrow(adj_SA)
+while (i > 0) {
+  graph_SA <- add_edges(graph_SA, edges = as.matrix(adj_SA[i, c("country_1", "country_2")]))
+  i <- i - 1
+  
+}
+```
+
+```{r}
+adj_EU <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i <- nrow(df_EU_wines_by_country)
+z <- nrow(df_EU_wines_by_country)
+
+adj_EU <- tibble()  # Initialize an empty tibble
+
+while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+
+  country_1 <- df_EU_wines_by_country[i, 1]
+  country_2 <- df_EU_wines_by_country[z, 1]
+
+  adj <- ifelse(
+    ifelse(df_EU_wines_by_country[z, 2] > df_EU_wines_by_country[i, 2],
+           df_EU_wines_by_country[z, 2] / df_EU_wines_by_country[i, 2],
+           df_EU_wines_by_country[i, 2] / df_EU_wines_by_country[z, 2]) > 10,
+    NA,
+    ifelse(df_EU_wines_by_country[z, 2] > df_EU_wines_by_country[i, 2],
+           df_EU_wines_by_country[z, 2] / df_EU_wines_by_country[i, 2],
+           df_EU_wines_by_country[i, 2] / df_EU_wines_by_country[z, 2])
+  )
+
+  # Create a tibble with the values and add it to adj_AS
+  row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
+  adj_EU <- bind_rows(adj_EU, row_data)
+
+  z <- z - 1
+
+  if (z == 0) {
+    i <- i - 1
+    z <- i
+  }
+}
+adj_EU <-na.omit(adj_EU)
+graph_EU <- graph.empty()
+
+vertex_size_EU <- tibble(Country = character(),Size = numeric())
+i <- nrow(df_EU_wines_by_country)
+while(i > 0){
+  Country = df_EU_wines_by_country[i,1]
+  Size <- ifelse(df_EU_wines_by_country[i,2]/1000 > 2, (df_EU_wines_by_country[i,2]/1000)+7, 7)
+  add_row(vertex_size_EU, Country=character(), Size=numeric())
+  row_data <- tibble(Country=Country,Size=Size)
+  vertex_size_EU <- bind_rows(vertex_size_EU,row_data)
+  i <- i - 1
+  vertex_size_EU <- vertex_size_EU[order(vertex_size_EU$Size, decreasing = TRUE),]
+}
+
+graph_EU <- add_vertices(graph_EU, n = nrow(df_EU_wines_by_country), name = df_EU_wines_by_country$Country, size = vertex_size_EU$Size)
+
+i<-nrow(adj_EU)
+while (i > 0) {
+  graph_EU <- add_edges(graph_EU, edges = as.matrix(adj_EU[i, c("country_1", "country_2")]))
+  i <- i - 1
+  
+}
+```
+
+```{r}
+adj_NA <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i <- nrow(df_NA_wines_by_country)
+z <- nrow(df_NA_wines_by_country)
+
+adj_NA <- tibble()  # Initialize an empty tibble
+
+while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+
+  country_1 <- df_NA_wines_by_country[i, 1]
+  country_2 <- df_NA_wines_by_country[z, 1]
+
+  adj <- ifelse(
+    ifelse(df_NA_wines_by_country[z, 2] > df_NA_wines_by_country[i, 2],
+           df_NA_wines_by_country[z, 2] / df_NA_wines_by_country[i, 2],
+           df_NA_wines_by_country[i, 2] / df_NA_wines_by_country[z, 2]) > 10,
+    NA,
+    ifelse(df_NA_wines_by_country[z, 2] > df_NA_wines_by_country[i, 2],
+           df_NA_wines_by_country[z, 2] / df_NA_wines_by_country[i, 2],
+           df_NA_wines_by_country[i, 2] / df_NA_wines_by_country[z, 2])
+  )
+
+  # Create a tibble with the values and add it to adj_AS
+  row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
+  adj_NA <- bind_rows(adj_NA, row_data)
+
+  z <- z - 1
+
+  if (z == 0) {
+    i <- i - 1
+    z <- i
+  }
+}
+adj_NA <-na.omit(adj_NA)
+graph_NA <- graph.empty()
+
+vertex_size_NA <- tibble(Country = character(),Size = numeric())
+i <- nrow(df_NA_wines_by_country)
+while(i > 0){
+  Country = df_NA_wines_by_country[i,1]
+  Size <- ifelse(df_NA_wines_by_country[i,2]/1000 > 2, (df_NA_wines_by_country[i,2]/1000)+7, 7)
+  add_row(vertex_size_NA, Country=character(), Size=numeric())
+  row_data <- tibble(Country=Country,Size=Size)
+  vertex_size_NA <- bind_rows(vertex_size_NA,row_data)
+  i <- i - 1
+  vertex_size_NA <- vertex_size_NA[order(vertex_size_NA$Size, decreasing = TRUE),]
+}
+
+graph_NA <- add_vertices(graph_NA, n = nrow(df_NA_wines_by_country), name = df_NA_wines_by_country$Country, size = vertex_size_NA$Size)
+
+i<-nrow(adj_NA)
+while (i > 0) {
+  graph_NA <- add_edges(graph_NA, edges = as.matrix(adj_NA[i, c("country_1", "country_2")]))
+  i <- i - 1
+  
+}
+```
+
+```{r}
+adj_AS <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i <- nrow(df_AS_wines_by_country)
+z <- nrow(df_AS_wines_by_country)
+
+adj_AS <- tibble()  # Initialize an empty tibble
+
+while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+
+  country_1 <- df_AS_wines_by_country[i, 1]
+  country_2 <- df_AS_wines_by_country[z, 1]
+
+  adj <- ifelse(
+    ifelse(df_AS_wines_by_country[z, 2] > df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[z, 2] / df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[i, 2] / df_AS_wines_by_country[z, 2]) > 10,
+    NA,
+    ifelse(df_AS_wines_by_country[z, 2] > df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[z, 2] / df_AS_wines_by_country[i, 2],
+           df_AS_wines_by_country[i, 2] / df_AS_wines_by_country[z, 2])
+  )
+
+  # Create a tibble with the values and add it to adj_AS
+  row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
+  adj_AS <- bind_rows(adj_AS, row_data)
+
+  z <- z - 1
+
+  if (z == 0) {
+    i <- i - 1
+    z <- i
+  }
+}
+adj_AS <-na.omit(adj_AS)
+graph_AS <- graph.empty()
+
+vertex_size_AS <- tibble(Country = character(),Size = numeric())
+i <- nrow(df_AS_wines_by_country)
+while(i > 0){
+  Country = df_AS_wines_by_country[i,1]
+  Size <- ifelse(df_AS_wines_by_country[i,2]/100 > 5, (df_AS_wines_by_country[i,2]/100)+7, 7)
+  add_row(vertex_size_AS, Country=character(), Size=numeric())
+  row_data <- tibble(Country=Country,Size=Size)
+  vertex_size_AS <- bind_rows(vertex_size_AS,row_data)
+  i <- i - 1
+  vertex_size_AS <- vertex_size_AS[order(vertex_size_AS$Size, decreasing = TRUE),]
+}
+
+graph_AS <- add_vertices(graph_AS, n = nrow(df_AS_wines_by_country), name = df_AS_wines_by_country$Country, size = vertex_size_AS$Size)
+
+i<-nrow(adj_AS)
+while (i > 0) {
+  graph_AS <- add_edges(graph_AS, edges = as.matrix(adj_AS[i, c("country_1", "country_2")]))
+  i <- i - 1
+}
+```
+
+```{r}
+adj_AF <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i <- nrow(df_AF_wines_by_country)
+z <- nrow(df_AF_wines_by_country)
+
+adj_AF <- tibble()  # Initialize an empty tibble
+
+while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+
+  country_1 <- df_AF_wines_by_country[i, 1]
+  country_2 <- df_AF_wines_by_country[z, 1]
+
+  adj <- ifelse(
+    ifelse(df_AF_wines_by_country[z, 2] > df_AF_wines_by_country[i, 2],
+           df_AF_wines_by_country[z, 2] / df_AF_wines_by_country[i, 2],
+           df_AF_wines_by_country[i, 2] / df_AF_wines_by_country[z, 2]) > 10000,
+    NA,
+    ifelse(df_AF_wines_by_country[z, 2] > df_AF_wines_by_country[i, 2],
+           df_AF_wines_by_country[z, 2] / df_AF_wines_by_country[i, 2],
+           df_AF_wines_by_country[i, 2] / df_AF_wines_by_country[z, 2])
+  )
+
+  # Create a tibble with the values and add it to adj_AS
+  row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
+  adj_AF <- bind_rows(adj_AF, row_data)
+
+  z <- z - 1
+
+  if (z == 0) {
+    i <- i - 1
+    z <- i
+  }
+}
+adj_AF <-na.omit(adj_AF)
+graph_AF <- graph.empty()
+
+vertex_size_AF <- tibble(Country = character(),Size = numeric())
+i <- nrow(df_AF_wines_by_country)
+while(i > 0){
+  Country = df_AF_wines_by_country[i,1]
+  Size <- ifelse(df_AF_wines_by_country[i,2]/1000 > 2, (df_AF_wines_by_country[i,2]/1000)+7, 7)
+  add_row(vertex_size_AF, Country=character(), Size=numeric())
+  row_data <- tibble(Country=Country,Size=Size)
+  vertex_size_AF <- bind_rows(vertex_size_AF,row_data)
+  i <- i - 1
+  vertex_size_AF <- vertex_size_AF[order(vertex_size_AF$Size, decreasing = TRUE),]
+}
+
+graph_AF <- add_vertices(graph_AF, n = nrow(df_AF_wines_by_country), name = df_AF_wines_by_country$Country, size = vertex_size_AF$Size)
+
+i<-nrow(adj_AF)
+while (i > 0) {
+  graph_AF <- add_edges(graph_AF, edges = as.matrix(adj_AF[i, c("country_1", "country_2")]))
+  i <- i - 1
+  
+}
+```
+
+```{r}
+adj_OZ <- tibble( country_1=character(),country_2=character(),adj=numeric()
+)
+i <- nrow(df_OZ_wines_by_country)
+z <- nrow(df_OZ_wines_by_country)
+
+adj_OZ <- tibble()  # Initialize an empty tibble
+
+while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+
+  country_1 <- df_OZ_wines_by_country[i, 1]
+  country_2 <- df_OZ_wines_by_country[z, 1]
+
+  adj <- ifelse(
+    ifelse(df_OZ_wines_by_country[z, 2] > df_OZ_wines_by_country[i, 2],
+           df_OZ_wines_by_country[z, 2] / df_OZ_wines_by_country[i, 2],
+           df_OZ_wines_by_country[i, 2] / df_OZ_wines_by_country[z, 2]) > 10,
+    NA,
+    ifelse(df_OZ_wines_by_country[z, 2] > df_OZ_wines_by_country[i, 2],
+           df_OZ_wines_by_country[z, 2] / df_OZ_wines_by_country[i, 2],
+           df_OZ_wines_by_country[i, 2] / df_OZ_wines_by_country[z, 2])
+  )
+
+  # Create a tibble with the values and add it to adj_AS
+  row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
+  adj_OZ <- bind_rows(adj_OZ, row_data)
+
+  z <- z - 1
+
+  if (z == 0) {
+    i <- i - 1
+    z <- i
+  }
+}
+adj_OZ <-na.omit(adj_OZ)
+graph_OZ <- graph.empty()
+
+vertex_size_OZ <- tibble(Country = character(),Size = numeric())
+i <- nrow(df_OZ_wines_by_country)
+while(i > 0){
+  Country = df_OZ_wines_by_country[i,1]
+  Size <- ifelse(df_OZ_wines_by_country[i,2]/1000 > 2, (df_OZ_wines_by_country[i,2]/1000)+7, 7)
+  add_row(vertex_size_OZ, Country=character(), Size=numeric())
+  row_data <- tibble(Country=Country,Size=Size)
+  vertex_size_OZ <- bind_rows(vertex_size_OZ,row_data)
+  i <- i - 1
+  vertex_size_OZ <- vertex_size_OZ[order(vertex_size_OZ$Size, decreasing = TRUE),]
+}
+
+graph_OZ <- add_vertices(graph_OZ, n = nrow(df_OZ_wines_by_country), name = df_OZ_wines_by_country$Country, size = vertex_size_OZ$Size)
+
+i<-nrow(adj_OZ)
+while (i > 0) {
+  graph_OZ <- add_edges(graph_OZ, edges = as.matrix(adj_OZ[i, c("country_1", "country_2")]))
+  i <- i - 1
+  
+}
+```
+
+```{r}
+layout = layout_with_graphopt(graph_OZ)
+plot(simplify(graph_OZ), edge.arrow.size = 0.2,layout = layout, main = "Ociania")
+
+layout = layout_with_graphopt(graph_AF)
+plot(simplify(graph_AF), edge.arrow.size = 0.2,layout = layout, main = "Africa")
+
+layout = layout_with_graphopt(graph_AS)
+plot(simplify(graph_AS), edge.arrow.size = 0.2,layout = layout, main = "Asia")
+
+layout = layout_with_graphopt(graph_NA)
+plot(simplify(graph_NA), edge.arrow.size = 0.2,layout = layout, main = "North America")
+
+layout = layout_with_graphopt(graph_EU)
+plot(simplify(graph_EU), edge.arrow.size = 0.2,layout = layout, main = "Europe")
+
+layout = layout_with_graphopt(graph_SA)
+plot(simplify(graph_SA), edge.arrow.size = 0.2,layout = layout, main = "South America")
+```

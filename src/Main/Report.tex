@@ -1,0 +1,836 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Report},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Report}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\section{Social Network Analysis Report on Wine Review
+Data}\label{social-network-analysis-report-on-wine-review-data}
+
+\subsection{Data Exploration}\label{data-exploration}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# loading the data and assigning the date to the working Dataframe}
+\FunctionTok{library}\NormalTok{(readr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(igraph)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'igraph'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:dplyr':
+## 
+##     as_data_frame, groups, union
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     decompose, spectrum
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:base':
+## 
+##     union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{winemag\_data\_130k\_v2 }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"/Users/john{-}thomas/Desktop/UNI/SNA/SocialNetworkAnalysis/src/Main/Data/archive/winemag{-}data{-}130k{-}v2.csv"}\NormalTok{,}\AttributeTok{show\_col\_types =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## New names:
+## * `` -> `...1`
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ winemag\_data\_130k\_v2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# lets take a first look at the Dataset by checking the first 10 columns}
+\FunctionTok{head}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 14
+##    ...1 country  description designation points price province region_1 region_2
+##   <dbl> <chr>    <chr>       <chr>        <dbl> <dbl> <chr>    <chr>    <chr>   
+## 1     0 Italy    Aromas inc~ Vulkà Bian~     87    NA Sicily ~ Etna     <NA>    
+## 2     1 Portugal This is ri~ Avidagos        87    15 Douro    <NA>     <NA>    
+## 3     2 US       Tart and s~ <NA>            87    14 Oregon   Willame~ Willame~
+## 4     3 US       Pineapple ~ Reserve La~     87    13 Michigan Lake Mi~ <NA>    
+## 5     4 US       Much like ~ Vintner's ~     87    65 Oregon   Willame~ Willame~
+## 6     5 Spain    Blackberry~ Ars In Vit~     87    15 Norther~ Navarra  <NA>    
+## # i 5 more variables: taster_name <chr>, taster_twitter_handle <chr>,
+## #   title <chr>, variety <chr>, winery <chr>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_Countries }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(df[}\StringTok{\textquotesingle{}country\textquotesingle{}}\NormalTok{]))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Countries in Asia}
+\NormalTok{asia\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"Afghanistan"}\NormalTok{, }\StringTok{"Armenia"}\NormalTok{, }\StringTok{"Azerbaijan"}\NormalTok{, }\StringTok{"Bahrain"}\NormalTok{, }\StringTok{"Bangladesh"}\NormalTok{, }\StringTok{"Bhutan"}\NormalTok{, }
+  \StringTok{"Brunei"}\NormalTok{, }\StringTok{"Cambodia"}\NormalTok{, }\StringTok{"China"}\NormalTok{, }\StringTok{"Cyprus"}\NormalTok{, }\StringTok{"Georgia"}\NormalTok{, }\StringTok{"India"}\NormalTok{, }\StringTok{"Indonesia"}\NormalTok{, }
+  \StringTok{"Iran"}\NormalTok{, }\StringTok{"Iraq"}\NormalTok{, }\StringTok{"Israel"}\NormalTok{, }\StringTok{"Japan"}\NormalTok{, }\StringTok{"Jordan"}\NormalTok{, }\StringTok{"Kazakhstan"}\NormalTok{, }\StringTok{"Kuwait"}\NormalTok{, }
+  \StringTok{"Kyrgyzstan"}\NormalTok{, }\StringTok{"Laos"}\NormalTok{, }\StringTok{"Lebanon"}\NormalTok{, }\StringTok{"Malaysia"}\NormalTok{, }\StringTok{"Maldives"}\NormalTok{, }\StringTok{"Mongolia"}\NormalTok{, }
+  \StringTok{"Myanmar"}\NormalTok{, }\StringTok{"Nepal"}\NormalTok{, }\StringTok{"North Korea"}\NormalTok{, }\StringTok{"Oman"}\NormalTok{, }\StringTok{"Pakistan"}\NormalTok{, }\StringTok{"Palestine"}\NormalTok{, }
+  \StringTok{"Philippines"}\NormalTok{, }\StringTok{"Qatar"}\NormalTok{, }\StringTok{"Saudi Arabia"}\NormalTok{, }\StringTok{"Singapore"}\NormalTok{, }\StringTok{"South Korea"}\NormalTok{, }
+  \StringTok{"Sri Lanka"}\NormalTok{, }\StringTok{"Syria"}\NormalTok{, }\StringTok{"Taiwan"}\NormalTok{, }\StringTok{"Tajikistan"}\NormalTok{, }\StringTok{"Thailand"}\NormalTok{, }\StringTok{"Timor{-}Leste"}\NormalTok{, }
+  \StringTok{"Turkey"}\NormalTok{, }\StringTok{"Turkmenistan"}\NormalTok{, }\StringTok{"United Arab Emirates"}\NormalTok{, }\StringTok{"Uzbekistan"}\NormalTok{, }
+  \StringTok{"Vietnam"}\NormalTok{, }\StringTok{"Yemen"}
+\NormalTok{)}
+
+\CommentTok{\# Countries in Europe}
+\NormalTok{europe\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"Albania"}\NormalTok{, }\StringTok{"Andorra"}\NormalTok{, }\StringTok{"Austria"}\NormalTok{, }\StringTok{"Belarus"}\NormalTok{, }\StringTok{"Belgium"}\NormalTok{, }
+  \StringTok{"Bosnia and Herzegovina"}\NormalTok{, }\StringTok{"Bulgaria"}\NormalTok{, }\StringTok{"Croatia"}\NormalTok{, }\StringTok{"Cyprus"}\NormalTok{, }
+  \StringTok{"Czech Republic"}\NormalTok{, }\StringTok{"Denmark"}\NormalTok{, }\StringTok{"Estonia"}\NormalTok{, }\StringTok{"Finland"}\NormalTok{, }\StringTok{"France"}\NormalTok{, }
+  \StringTok{"Germany"}\NormalTok{, }\StringTok{"Greece"}\NormalTok{, }\StringTok{"Hungary"}\NormalTok{, }\StringTok{"Iceland"}\NormalTok{, }\StringTok{"Ireland"}\NormalTok{, }\StringTok{"Italy"}\NormalTok{, }
+  \StringTok{"Kosovo"}\NormalTok{, }\StringTok{"Latvia"}\NormalTok{, }\StringTok{"Liechtenstein"}\NormalTok{, }\StringTok{"Lithuania"}\NormalTok{, }\StringTok{"Luxembourg"}\NormalTok{, }
+  \StringTok{"Malta"}\NormalTok{, }\StringTok{"Moldova"}\NormalTok{, }\StringTok{"Monaco"}\NormalTok{, }\StringTok{"Montenegro"}\NormalTok{, }\StringTok{"Netherlands"}\NormalTok{, }
+  \StringTok{"Macedonia"}\NormalTok{, }\StringTok{"Norway"}\NormalTok{, }\StringTok{"Poland"}\NormalTok{, }\StringTok{"Portugal"}\NormalTok{, }\StringTok{"Romania"}\NormalTok{, }
+  \StringTok{"Russia"}\NormalTok{, }\StringTok{"San Marino"}\NormalTok{, }\StringTok{"Serbia"}\NormalTok{, }\StringTok{"Slovakia"}\NormalTok{, }\StringTok{"Slovenia"}\NormalTok{, }
+  \StringTok{"Spain"}\NormalTok{, }\StringTok{"Sweden"}\NormalTok{, }\StringTok{"Switzerland"}\NormalTok{, }\StringTok{"Ukraine"}\NormalTok{, }\StringTok{"England"}\NormalTok{, }
+  \StringTok{"Vatican City"}
+\NormalTok{)}
+
+\CommentTok{\# Countries in Africa}
+\NormalTok{africa\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"Algeria"}\NormalTok{, }\StringTok{"Angola"}\NormalTok{, }\StringTok{"Benin"}\NormalTok{, }\StringTok{"Botswana"}\NormalTok{, }\StringTok{"Burkina Faso"}\NormalTok{, }\StringTok{"Burundi"}\NormalTok{, }
+  \StringTok{"Cabo Verde"}\NormalTok{, }\StringTok{"Cameroon"}\NormalTok{, }\StringTok{"Central African Republic"}\NormalTok{, }\StringTok{"Chad"}\NormalTok{, }
+  \StringTok{"Comoros"}\NormalTok{, }\StringTok{"Democratic Republic of the Congo"}\NormalTok{, }\StringTok{"Djibouti"}\NormalTok{, }\StringTok{"Egypt"}\NormalTok{, }
+  \StringTok{"Equatorial Guinea"}\NormalTok{, }\StringTok{"Eritrea"}\NormalTok{, }\StringTok{"Eswatini"}\NormalTok{, }\StringTok{"Ethiopia"}\NormalTok{, }\StringTok{"Gabon"}\NormalTok{, }
+  \StringTok{"Gambia"}\NormalTok{, }\StringTok{"Ghana"}\NormalTok{, }\StringTok{"Guinea"}\NormalTok{, }\StringTok{"Guinea{-}Bissau"}\NormalTok{, }\StringTok{"Ivory Coast"}\NormalTok{, }
+  \StringTok{"Kenya"}\NormalTok{, }\StringTok{"Lesotho"}\NormalTok{, }\StringTok{"Liberia"}\NormalTok{, }\StringTok{"Libya"}\NormalTok{, }\StringTok{"Madagascar"}\NormalTok{, }\StringTok{"Malawi"}\NormalTok{, }
+  \StringTok{"Mali"}\NormalTok{, }\StringTok{"Mauritania"}\NormalTok{, }\StringTok{"Mauritius"}\NormalTok{, }\StringTok{"Morocco"}\NormalTok{, }\StringTok{"Mozambique"}\NormalTok{, }
+  \StringTok{"Namibia"}\NormalTok{, }\StringTok{"Niger"}\NormalTok{, }\StringTok{"Nigeria"}\NormalTok{, }\StringTok{"Rwanda"}\NormalTok{, }\StringTok{"Sao Tome and Principe"}\NormalTok{, }
+  \StringTok{"Senegal"}\NormalTok{, }\StringTok{"Seychelles"}\NormalTok{, }\StringTok{"Sierra Leone"}\NormalTok{, }\StringTok{"Somalia"}\NormalTok{, }\StringTok{"South Africa"}\NormalTok{, }
+  \StringTok{"South Sudan"}\NormalTok{, }\StringTok{"Sudan"}\NormalTok{, }\StringTok{"Tanzania"}\NormalTok{, }\StringTok{"Togo"}\NormalTok{, }\StringTok{"Tunisia"}\NormalTok{, }\StringTok{"Uganda"}\NormalTok{, }
+  \StringTok{"Zambia"}\NormalTok{, }\StringTok{"Zimbabwe"}
+\NormalTok{)}
+
+\CommentTok{\# Countries in North America}
+\NormalTok{north\_america\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"Canada"}\NormalTok{, }\StringTok{"US"}\NormalTok{, }\StringTok{"Mexico"}\NormalTok{, }\StringTok{"Guatemala"}\NormalTok{, }\StringTok{"Honduras"}\NormalTok{, }
+  \StringTok{"El Salvador"}\NormalTok{, }\StringTok{"Nicaragua"}\NormalTok{, }\StringTok{"Costa Rica"}\NormalTok{, }\StringTok{"Panama"}\NormalTok{, }\StringTok{"Belize"}\NormalTok{, }
+  \StringTok{"Cuba"}\NormalTok{, }\StringTok{"Jamaica"}\NormalTok{, }\StringTok{"Haiti"}\NormalTok{, }\StringTok{"Dominican Republic"}\NormalTok{, }\StringTok{"Puerto Rico"}\NormalTok{, }
+  \StringTok{"Bahamas"}\NormalTok{, }\StringTok{"Trinidad and Tobago"}\NormalTok{, }\StringTok{"Barbados"}\NormalTok{, }\StringTok{"Saint Lucia"}\NormalTok{, }
+  \StringTok{"Grenada"}\NormalTok{, }\StringTok{"Antigua and Barbuda"}\NormalTok{, }\StringTok{"Saint Vincent and the Grenadines"}\NormalTok{, }
+  \StringTok{"Saint Kitts and Nevis"}
+\NormalTok{)}
+
+\CommentTok{\# Countries in South America}
+\NormalTok{south\_america\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"Argentina"}\NormalTok{, }\StringTok{"Brazil"}\NormalTok{, }\StringTok{"Chile"}\NormalTok{, }\StringTok{"Colombia"}\NormalTok{, }\StringTok{"Ecuador"}\NormalTok{, }\StringTok{"Peru"}\NormalTok{, }
+  \StringTok{"Bolivia"}\NormalTok{, }\StringTok{"Paraguay"}\NormalTok{, }\StringTok{"Uruguay"}\NormalTok{, }\StringTok{"Venezuela"}\NormalTok{, }\StringTok{"Guyana"}\NormalTok{, }\StringTok{"Suriname"}\NormalTok{, }
+  \StringTok{"French Guiana"}\NormalTok{, }\StringTok{"Falkland Islands"}
+\NormalTok{)}
+
+\CommentTok{\# Countries in Oceania}
+\NormalTok{oceania\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"Australia"}\NormalTok{, }\StringTok{"New Zealand"}\NormalTok{, }\StringTok{"Fiji"}\NormalTok{, }\StringTok{"Papua New Guinea"}\NormalTok{, }
+  \StringTok{"Solomon Islands"}\NormalTok{, }\StringTok{"Vanuatu"}\NormalTok{, }\StringTok{"New Caledonia"}\NormalTok{, }\StringTok{"French Polynesia"}\NormalTok{, }
+  \StringTok{"Samoa"}\NormalTok{, }\StringTok{"Tonga"}\NormalTok{, }\StringTok{"Kiribati"}\NormalTok{, }\StringTok{"Tuvalu"}\NormalTok{, }\StringTok{"Micronesia"}\NormalTok{, }
+  \StringTok{"Marshall Islands"}\NormalTok{, }\StringTok{"Palau"}\NormalTok{, }\StringTok{"Nauru"}
+\NormalTok{)}
+\CommentTok{\#South America}
+\NormalTok{df\_SA }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ south\_america\_countries,]}
+\NormalTok{df\_SA\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_SA}\SpecialCharTok{$}\NormalTok{country))}
+\NormalTok{df\_SA\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_SA\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_SA\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
+
+\CommentTok{\#Europe}
+\NormalTok{df\_EU }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ europe\_countries,]}
+\NormalTok{df\_EU\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_EU}\SpecialCharTok{$}\NormalTok{country))}
+\NormalTok{df\_EU\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_EU\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
+
+\CommentTok{\#North America}
+\NormalTok{df\_NA }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ north\_america\_countries,]}
+\NormalTok{df\_NA\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_NA}\SpecialCharTok{$}\NormalTok{country))}
+\NormalTok{df\_NA\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_NA\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_NA\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
+
+\CommentTok{\#Africa}
+\NormalTok{df\_AF }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ africa\_countries,]}
+\NormalTok{df\_AF\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_AF}\SpecialCharTok{$}\NormalTok{country))}
+\NormalTok{df\_AF\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_AF\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_AF\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
+
+\CommentTok{\# Ociania}
+\NormalTok{df\_OZ }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ oceania\_countries,]}
+\NormalTok{df\_OZ\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_OZ}\SpecialCharTok{$}\NormalTok{country))}
+\NormalTok{df\_OZ\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_OZ\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_OZ\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
+
+\CommentTok{\#Asia}
+\NormalTok{df\_AS }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ asia\_countries,]}
+\NormalTok{df\_AS\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_AS}\SpecialCharTok{$}\NormalTok{country))}
+\NormalTok{df\_AS\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_AS\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
+
+\CommentTok{\#renaming the columns}
+\NormalTok{df\_SA\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_SA\_wines\_by\_country }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Var1, }\AttributeTok{Weight =}\NormalTok{ Freq)}
+\NormalTok{df\_EU\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Var1, }\AttributeTok{Weight =}\NormalTok{ Freq)}
+\NormalTok{df\_NA\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_NA\_wines\_by\_country }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Var1, }\AttributeTok{Weight =}\NormalTok{ Freq)}
+\NormalTok{df\_AF\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_AF\_wines\_by\_country }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Var1, }\AttributeTok{Weight =}\NormalTok{ Freq)}
+\NormalTok{df\_OZ\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_OZ\_wines\_by\_country }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Var1, }\AttributeTok{Weight =}\NormalTok{ Freq)}
+\NormalTok{df\_AS\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Var1, }\AttributeTok{Weight =}\NormalTok{ Freq)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adj\_SA }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
+\NormalTok{)}
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country)}
+\NormalTok{z}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country)}
+\ControlFlowTok{while}\NormalTok{ (i}\SpecialCharTok{\textgreater{}=}\DecValTok{0}\NormalTok{) \{}
+  
+  
+\NormalTok{    country\_1 }\OtherTok{=}\NormalTok{ df\_SA\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+    
+\NormalTok{    country\_2 }\OtherTok{=}\NormalTok{ df\_SA\_wines\_by\_country[z,}\DecValTok{1}\NormalTok{]}
+    
+\NormalTok{    adj }\OtherTok{=} 
+      \FunctionTok{ifelse}\NormalTok{(      }
+        \FunctionTok{ifelse}\NormalTok{(}
+\NormalTok{          df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{1000}\NormalTok{,}
+        \DecValTok{0}\NormalTok{, }
+        \FunctionTok{ifelse}\NormalTok{(}
+\NormalTok{          df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{      )}
+    
+ 
+
+\NormalTok{adj\_SA }\OtherTok{\textless{}{-}}\NormalTok{ adj\_SA }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_row}\NormalTok{(country\_1,country\_2,adj)}
+\NormalTok{    z }\OtherTok{=}\NormalTok{ z}\DecValTok{{-}1}
+  \ControlFlowTok{if}\NormalTok{(z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{    i }\OtherTok{=}\NormalTok{ i}\DecValTok{{-}1}
+\NormalTok{    z }\OtherTok{=} \FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country)}
+\NormalTok{  \}}
+\NormalTok{\}}
+\NormalTok{graph\_SA }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(adj\_SA, }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\# Get the adjacency matrix}
+\NormalTok{adj\_matrix\_SA }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_SA, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
+
+
+\NormalTok{graph\_SA }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_SA, }\AttributeTok{mode =} \StringTok{"undirected"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_kk}\NormalTok{(graph\_SA)}
+
+\CommentTok{\# Plot the graph}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_SA), }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_SA)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"South America"}\NormalTok{, }\AttributeTok{layout =}\NormalTok{ layout)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adj\_EU }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
+\NormalTok{)}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country)}
+\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country)}
+
+\NormalTok{adj\_EU }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{()  }\CommentTok{\# Initialize an empty tibble}
+
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }\CommentTok{\# Adjusted loop condition to avoid i = 0}
+
+\NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
+\NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
+
+\NormalTok{  adj }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}
+    \FunctionTok{ifelse}\NormalTok{(df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{5}\NormalTok{,}
+    \ConstantTok{NA}\NormalTok{,}
+    \FunctionTok{ifelse}\NormalTok{(df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{  )}
+
+  \CommentTok{\# Create a tibble with the values and add it to adj\_AS}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{country\_1 =}\NormalTok{ country\_1, }\AttributeTok{country\_2 =}\NormalTok{ country\_2, }\AttributeTok{adj =}\NormalTok{ adj)}
+\NormalTok{  adj\_EU }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_EU, row\_data)}
+
+\NormalTok{  z }\OtherTok{\textless{}{-}}\NormalTok{ z }\SpecialCharTok{{-}} \DecValTok{1}
+
+  \ControlFlowTok{if}\NormalTok{ (z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{    z }\OtherTok{\textless{}{-}}\NormalTok{ i}
+\NormalTok{  \}}
+\NormalTok{\}}
+\NormalTok{adj\_EU }\OtherTok{\textless{}{-}}\FunctionTok{na.omit}\NormalTok{(adj\_EU)}
+\NormalTok{graph\_EU }\OtherTok{\textless{}{-}} \FunctionTok{graph.empty}\NormalTok{()}
+
+\NormalTok{vertex\_size\_EU }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =} \FunctionTok{character}\NormalTok{(),}\AttributeTok{Size =} \FunctionTok{numeric}\NormalTok{())}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country)}
+\ControlFlowTok{while}\NormalTok{(i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{  Country }\OtherTok{=}\NormalTok{ df\_EU\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  Size }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(df\_EU\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000} \SpecialCharTok{\textgreater{}} \DecValTok{2}\NormalTok{, df\_EU\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+  \FunctionTok{add\_row}\NormalTok{(vertex\_size\_EU, }\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Size=}\FunctionTok{numeric}\NormalTok{())}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\NormalTok{Country,}\AttributeTok{Size=}\NormalTok{Size)}
+\NormalTok{  vertex\_size\_EU }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(vertex\_size\_EU,row\_data)}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{  vertex\_size\_EU }\OtherTok{\textless{}{-}}\NormalTok{ vertex\_size\_EU[}\FunctionTok{order}\NormalTok{(vertex\_size\_EU}\SpecialCharTok{$}\NormalTok{Size, }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{),]}
+\NormalTok{\}}
+
+\NormalTok{graph\_EU }\OtherTok{\textless{}{-}} \FunctionTok{add\_vertices}\NormalTok{(graph\_EU, }\AttributeTok{n =} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country), }\AttributeTok{name =}\NormalTok{ df\_EU\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Country, }\AttributeTok{size =}\NormalTok{ vertex\_size\_EU}\SpecialCharTok{$}\NormalTok{Size)}
+
+
+\NormalTok{colors\_EU }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Color=}\FunctionTok{character}\NormalTok{())}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country)}
+
+\ControlFlowTok{while}\NormalTok{(i}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{)\{}
+\NormalTok{  generate\_random\_color }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{() \{}
+\NormalTok{  red }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{  green }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{  blue }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+  \FunctionTok{return}\NormalTok{(}\FunctionTok{rgb}\NormalTok{(red, green, blue))}
+\NormalTok{  \}}
+  
+\NormalTok{  Country }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  Color}\OtherTok{\textless{}{-}}\FunctionTok{generate\_random\_color}\NormalTok{()}
+  \FunctionTok{add\_row}\NormalTok{(colors\_EU,}\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{Color=}\FunctionTok{character}\NormalTok{())}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i}\DecValTok{{-}1}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Country, }\AttributeTok{Color =}\NormalTok{ Color)}
+\NormalTok{  colors\_EU }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(colors\_EU, row\_data)}
+\NormalTok{\}}
+
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(adj\_EU)}
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{  graph\_EU }\OtherTok{\textless{}{-}} \FunctionTok{add\_edges}\NormalTok{(graph\_EU, }\AttributeTok{edges =} \FunctionTok{as.matrix}\NormalTok{(adj\_EU[i, }\FunctionTok{c}\NormalTok{(}\StringTok{"country\_1"}\NormalTok{, }\StringTok{"country\_2"}\NormalTok{)]))}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+  
+\NormalTok{\}}
+
+
+\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_graphopt}\NormalTok{(graph\_EU)}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_EU), }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adj\_NA }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
+\NormalTok{)}
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country)}
+\NormalTok{z}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country)}
+\ControlFlowTok{while}\NormalTok{ (i}\SpecialCharTok{\textgreater{}=}\DecValTok{0}\NormalTok{) \{}
+  
+  
+\NormalTok{    country\_1 }\OtherTok{=}\NormalTok{ df\_NA\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+    
+\NormalTok{    country\_2 }\OtherTok{=}\NormalTok{ df\_NA\_wines\_by\_country[z,}\DecValTok{1}\NormalTok{]}
+    
+\NormalTok{    adj }\OtherTok{=} 
+      \FunctionTok{ifelse}\NormalTok{(      }
+        \FunctionTok{ifelse}\NormalTok{(}
+\NormalTok{          df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{1000}\NormalTok{,}
+        \DecValTok{0}\NormalTok{, }
+        \FunctionTok{ifelse}\NormalTok{(}
+\NormalTok{          df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{      )}
+    
+ 
+
+\NormalTok{adj\_NA }\OtherTok{\textless{}{-}}\NormalTok{ adj\_NA }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_row}\NormalTok{(country\_1,country\_2,adj)}
+\NormalTok{    z }\OtherTok{=}\NormalTok{ z}\DecValTok{{-}1}
+  \ControlFlowTok{if}\NormalTok{(z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{    i }\OtherTok{=}\NormalTok{ i}\DecValTok{{-}1}
+\NormalTok{    z }\OtherTok{=} \FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country)}
+\NormalTok{  \}}
+\NormalTok{\}}
+\NormalTok{graph\_NA }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(adj\_NA), }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\# Get the adjacency matrix}
+\NormalTok{adj\_matrix\_NA }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_NA, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
+
+\NormalTok{graph\_NA }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_NA, }\AttributeTok{mode =} \StringTok{"undirected"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{layout }\OtherTok{\textless{}{-}} \FunctionTok{layout\_with\_lgl}\NormalTok{(graph\_NA)}
+
+\CommentTok{\# Plot the graph}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_NA), }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_NA)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"North America"}\NormalTok{, }\AttributeTok{layout=}\NormalTok{layout, }\AttributeTok{vertex.size =} \DecValTok{6}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
+\NormalTok{)}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
+\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
+
+\NormalTok{adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{()  }\CommentTok{\# Initialize an empty tibble}
+
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }\CommentTok{\# Adjusted loop condition to avoid i = 0}
+
+\NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
+\NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
+
+\NormalTok{  adj }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}
+    \FunctionTok{ifelse}\NormalTok{(df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{100}\NormalTok{,}
+    \DecValTok{0}\NormalTok{,}
+    \FunctionTok{ifelse}\NormalTok{(df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{  )}
+
+  \CommentTok{\# Create a tibble with the values and add it to adj\_AS}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{country\_1 =}\NormalTok{ country\_1, }\AttributeTok{country\_2 =}\NormalTok{ country\_2, }\AttributeTok{adj =}\NormalTok{ adj)}
+\NormalTok{  adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_AS, row\_data)}
+
+\NormalTok{  z }\OtherTok{\textless{}{-}}\NormalTok{ z }\SpecialCharTok{{-}} \DecValTok{1}
+
+  \ControlFlowTok{if}\NormalTok{ (z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{    z }\OtherTok{\textless{}{-}}\NormalTok{ i}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\NormalTok{graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(adj\_AS), }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\# Get the adjacency matrix}
+\NormalTok{adj\_matrix\_AS }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_AS, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
+\FunctionTok{print}\NormalTok{(adj\_matrix\_AS)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         China Armenia     India    Cyprus   Lebanon   Georgia    Turkey
+## China       1     2.0  9.000000 11.000000 35.000000 86.000000 90.000000
+## Armenia     2     1.0  4.500000  5.500000 17.500000 43.000000 45.000000
+## India       9     4.5  1.000000  1.222222  3.888889  9.555556 10.000000
+## Cyprus     11     5.5  1.222222  1.000000  3.181818  7.818182  8.181818
+## Lebanon    35    17.5  3.888889  3.181818  1.000000  2.457143  2.571429
+## Georgia    86    43.0  9.555556  7.818182  2.457143  1.000000  1.046512
+## Turkey     90    45.0 10.000000  8.181818  2.571429  1.046512  1.000000
+## Israel      0     0.0 56.111111 45.909091 14.428571  5.872093  5.611111
+##            Israel
+## China    0.000000
+## Armenia  0.000000
+## India   56.111111
+## Cyprus  45.909091
+## Lebanon 14.428571
+## Georgia  5.872093
+## Turkey   5.611111
+## Israel   1.000000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_AS, }\AttributeTok{mode =} \StringTok{"directed"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{layout }\OtherTok{\textless{}{-}} \FunctionTok{layout\_with\_kk}\NormalTok{(graph\_AS)}
+\FunctionTok{print}\NormalTok{(}\FunctionTok{get.edgelist}\NormalTok{(graph\_AS))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       [,1]      [,2]     
+##  [1,] "China"   "Armenia"
+##  [2,] "China"   "India"  
+##  [3,] "China"   "Cyprus" 
+##  [4,] "China"   "Lebanon"
+##  [5,] "China"   "Georgia"
+##  [6,] "China"   "Turkey" 
+##  [7,] "Armenia" "China"  
+##  [8,] "Armenia" "India"  
+##  [9,] "Armenia" "Cyprus" 
+## [10,] "Armenia" "Lebanon"
+## [11,] "Armenia" "Georgia"
+## [12,] "Armenia" "Turkey" 
+## [13,] "India"   "China"  
+## [14,] "India"   "Armenia"
+## [15,] "India"   "Cyprus" 
+## [16,] "India"   "Lebanon"
+## [17,] "India"   "Georgia"
+## [18,] "India"   "Turkey" 
+## [19,] "India"   "Israel" 
+## [20,] "Cyprus"  "China"  
+## [21,] "Cyprus"  "Armenia"
+## [22,] "Cyprus"  "India"  
+## [23,] "Cyprus"  "Lebanon"
+## [24,] "Cyprus"  "Georgia"
+## [25,] "Cyprus"  "Turkey" 
+## [26,] "Cyprus"  "Israel" 
+## [27,] "Lebanon" "China"  
+## [28,] "Lebanon" "Armenia"
+## [29,] "Lebanon" "India"  
+## [30,] "Lebanon" "Cyprus" 
+## [31,] "Lebanon" "Georgia"
+## [32,] "Lebanon" "Turkey" 
+## [33,] "Lebanon" "Israel" 
+## [34,] "Georgia" "China"  
+## [35,] "Georgia" "Armenia"
+## [36,] "Georgia" "India"  
+## [37,] "Georgia" "Cyprus" 
+## [38,] "Georgia" "Lebanon"
+## [39,] "Georgia" "Turkey" 
+## [40,] "Georgia" "Israel" 
+## [41,] "Turkey"  "China"  
+## [42,] "Turkey"  "Armenia"
+## [43,] "Turkey"  "India"  
+## [44,] "Turkey"  "Cyprus" 
+## [45,] "Turkey"  "Lebanon"
+## [46,] "Turkey"  "Georgia"
+## [47,] "Turkey"  "Israel" 
+## [48,] "Israel"  "India"  
+## [49,] "Israel"  "Cyprus" 
+## [50,] "Israel"  "Lebanon"
+## [51,] "Israel"  "Georgia"
+## [52,] "Israel"  "Turkey"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot the graph}
+\FunctionTok{plot}\NormalTok{(graph\_AS, }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_AS)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"Asia"}\NormalTok{, }\AttributeTok{layout=}\NormalTok{layout, }\AttributeTok{vertex.size =} \DecValTok{6}\NormalTok{, }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adj\_AF }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
+\NormalTok{)}
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country)}
+\NormalTok{z}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country)}
+\ControlFlowTok{while}\NormalTok{ (i}\SpecialCharTok{\textgreater{}=}\DecValTok{0}\NormalTok{) \{}
+  
+  
+\NormalTok{    country\_1 }\OtherTok{=}\NormalTok{ df\_AF\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+    
+\NormalTok{    country\_2 }\OtherTok{=}\NormalTok{ df\_AF\_wines\_by\_country[z,}\DecValTok{1}\NormalTok{]}
+    
+\NormalTok{    adj }\OtherTok{=} 
+      \FunctionTok{ifelse}\NormalTok{(      }
+        \FunctionTok{ifelse}\NormalTok{(}
+\NormalTok{          df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{100}\NormalTok{,}
+        \DecValTok{0}\NormalTok{, }
+        \FunctionTok{ifelse}\NormalTok{(}
+\NormalTok{          df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{      )}
+    
+ 
+
+\NormalTok{adj\_AF }\OtherTok{\textless{}{-}}\NormalTok{ adj\_AF }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_row}\NormalTok{(country\_1,country\_2,adj)}
+\NormalTok{    z }\OtherTok{=}\NormalTok{ z}\DecValTok{{-}1}
+  \ControlFlowTok{if}\NormalTok{(z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{    i }\OtherTok{=}\NormalTok{ i}\DecValTok{{-}1}
+\NormalTok{    z }\OtherTok{=} \FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country)}
+\NormalTok{  \}}
+\NormalTok{\}}
+\NormalTok{graph\_AF }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(adj\_AF), }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\# Get the adjacency matrix}
+\NormalTok{adj\_matrix\_AF }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_AF, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
+
+\NormalTok{graph\_AF }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_AF, }\AttributeTok{mode =} \StringTok{"undirected"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{layout }\OtherTok{\textless{}{-}} \FunctionTok{layout\_with\_kk}\NormalTok{(graph\_AF)}
+
+\CommentTok{\# Plot the graph}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_AF), }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_AF)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"Africa"}\NormalTok{, }\AttributeTok{layout=}\NormalTok{layout, }\AttributeTok{vertex.size =} \DecValTok{6}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adj\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
+\NormalTok{)}
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country)}
+\NormalTok{z}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country)}
+\ControlFlowTok{while}\NormalTok{ (i}\SpecialCharTok{\textgreater{}=}\DecValTok{0}\NormalTok{) \{}
+  
+  
+\NormalTok{    country\_1 }\OtherTok{=}\NormalTok{ df\_OZ\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+    
+\NormalTok{    country\_2 }\OtherTok{=}\NormalTok{ df\_OZ\_wines\_by\_country[z,}\DecValTok{1}\NormalTok{]}
+    
+\NormalTok{    adj }\OtherTok{=} 
+      \FunctionTok{ifelse}\NormalTok{(      }
+        \FunctionTok{ifelse}\NormalTok{(}
+\NormalTok{          df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{1000}\NormalTok{,}
+        \DecValTok{0}\NormalTok{, }
+        \FunctionTok{ifelse}\NormalTok{(}
+\NormalTok{          df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{                 df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{      )}
+    
+ 
+
+\NormalTok{adj\_OZ }\OtherTok{\textless{}{-}}\NormalTok{ adj\_OZ }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_row}\NormalTok{(country\_1,country\_2,adj)}
+\NormalTok{    z }\OtherTok{=}\NormalTok{ z}\DecValTok{{-}1}
+  \ControlFlowTok{if}\NormalTok{(z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{    i }\OtherTok{=}\NormalTok{ i}\DecValTok{{-}1}
+\NormalTok{    z }\OtherTok{=} \FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country)}
+\NormalTok{  \}}
+\NormalTok{\}}
+\NormalTok{graph\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(adj\_OZ), }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\# Get the adjacency matrix}
+\NormalTok{adj\_matrix\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_OZ, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
+
+\NormalTok{graph\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_OZ, }\AttributeTok{mode =} \StringTok{"undirected"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{layout }\OtherTok{\textless{}{-}} \FunctionTok{layout\_with\_lgl}\NormalTok{(graph\_OZ)}
+
+\CommentTok{\# Plot the graph}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_OZ), }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_OZ)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"Ociania"}\NormalTok{, }\AttributeTok{layout=}\NormalTok{layout, }\AttributeTok{vertex.size =} \DecValTok{6}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
+\NormalTok{)}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
+\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
+
+\NormalTok{adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{()  }\CommentTok{\# Initialize an empty tibble}
+
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }\CommentTok{\# Adjusted loop condition to avoid i = 0}
+
+\NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
+\NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
+
+\NormalTok{  adj }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}
+    \FunctionTok{ifelse}\NormalTok{(df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{10}\NormalTok{,}
+    \ConstantTok{NA}\NormalTok{,}
+    \FunctionTok{ifelse}\NormalTok{(df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{  )}
+
+  \CommentTok{\# Create a tibble with the values and add it to adj\_AS}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{country\_1 =}\NormalTok{ country\_1, }\AttributeTok{country\_2 =}\NormalTok{ country\_2, }\AttributeTok{adj =}\NormalTok{ adj)}
+\NormalTok{  adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_AS, row\_data)}
+
+\NormalTok{  z }\OtherTok{\textless{}{-}}\NormalTok{ z }\SpecialCharTok{{-}} \DecValTok{1}
+
+  \ControlFlowTok{if}\NormalTok{ (z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{    z }\OtherTok{\textless{}{-}}\NormalTok{ i}
+\NormalTok{  \}}
+\NormalTok{\}}
+\NormalTok{adj\_AS }\OtherTok{\textless{}{-}}\FunctionTok{na.omit}\NormalTok{(adj\_AS)}
+\NormalTok{graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{graph.empty}\NormalTok{()}
+
+\NormalTok{graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{add\_vertices}\NormalTok{(graph\_AS, }\AttributeTok{n =} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country), }\AttributeTok{name =}\NormalTok{ df\_AS\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Country)}
+\NormalTok{vertex\_names }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(}\FunctionTok{V}\NormalTok{(graph\_AS))}
+\FunctionTok{print}\NormalTok{(vertex\_names)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Israel"  "Turkey"  "Georgia" "Lebanon" "Cyprus"  "India"   "Armenia"
+## [8] "China"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{colors\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Color=}\FunctionTok{character}\NormalTok{())}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
+
+\ControlFlowTok{while}\NormalTok{(i}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{)\{}
+\NormalTok{  generate\_random\_color }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{() \{}
+\NormalTok{  red }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{  green }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{  blue }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+  \FunctionTok{return}\NormalTok{(}\FunctionTok{rgb}\NormalTok{(red, green, blue))}
+\NormalTok{  \}}
+  
+\NormalTok{  Country }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  Color}\OtherTok{\textless{}{-}}\FunctionTok{generate\_random\_color}\NormalTok{()}
+  \FunctionTok{add\_row}\NormalTok{(colors\_AS,}\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{Color=}\FunctionTok{character}\NormalTok{())}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i}\DecValTok{{-}1}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Country, }\AttributeTok{Color =}\NormalTok{ Color)}
+\NormalTok{  colors\_AS }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(colors\_AS, row\_data)}
+\NormalTok{\}}
+
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(adj\_AS)}
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{  graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{add\_edges}\NormalTok{(graph\_AS, }\AttributeTok{edges =} \FunctionTok{as.matrix}\NormalTok{(adj\_AS[i, }\FunctionTok{c}\NormalTok{(}\StringTok{"country\_1"}\NormalTok{, }\StringTok{"country\_2"}\NormalTok{)]))}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+  
+\NormalTok{\}}
+
+\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_sugiyama}\NormalTok{(graph\_AS)}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_AS), }\AttributeTok{edge.arrow.size =} \FloatTok{0.3}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+\end{document}
