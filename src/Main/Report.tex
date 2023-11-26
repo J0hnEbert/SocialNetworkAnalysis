@@ -101,123 +101,574 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={Report},
+  pdftitle={Social Network Analysis Report on Wine Review Data},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 
-\title{Report}
+\title{Social Network Analysis Report on Wine Review Data}
 \author{}
 \date{\vspace{-2.5em}}
 
 \begin{document}
 \maketitle
 
-\section{Social Network Analysis Report on Wine Review
-Data}\label{social-network-analysis-report-on-wine-review-data}
+\section{Social Network Analysis Report über
+Weinbewertungs-Daten}\label{social-network-analysis-report-uxfcber-weinbewertungs-daten}
 
-\subsection{Data Exploration}\label{data-exploration}
+\subsection{Einleitung und
+Forschungsfrage}\label{einleitung-und-forschungsfrage}
+
+In der folgenden Arbeit wird der Datensatz ``Wine
+Reviews''(\url{https://www.kaggle.com/datasets/zynicide/wine-reviews/data})
+des Kaggle-Users ``Zackthoutt'' analysisert und behandelt. Der Datensatz
+wurde von der Website \url{https://www.wineenthusiast.com/} gescraped
+und durch ``Zackthoutt'' auf Kaggle bereitgestellt.
+
+Als Anreicherung wird weiterhin der Datensatz
+``wine-producing-countries-2023'' der website:
+\url{https://worldpopulationreview.com/country-rankings/wine-producing-countries}
+verwendet. Dieser Datensatz enthält die Produktion von Wein aller
+Länder.
+
+Wein ist eines der ältesten und am weitesten verbreiteten alkoholischen
+Getränke weltweit. Mit einer ca. 8000 Jahren alten Geschichte hat sich
+rund um das Thema wein eine vielfälltige und komplex Kutur gebildet.
+Wein und seine Vielfalt hat auch mein persönliches Interesse geweckt
+weshalb ich diesen Report dem Thema der Bewertung von Wein sowie seiner
+Produktion widmen möchte.
+
+Die Fragen die dieser Report beantworten soll sind:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Welches Land stellt die meißten der bewerteten Weine?
+\item
+  Welches Land bekommt durchschnittlich die besten bewertungen?
+\item
+  Welches Land hat das beste Preis-Punkte-Verhältis?
+\item
+  Stimmt die Verteilung der bewerteten Weine mit der weltweiten
+  Produktion (je Land) von Wein überein?
+\item
+  In welcher Relationen stehen die länder in Bezug auf die Anzahl der
+  bewerteten Weine zueinander?
+\end{enumerate}
+
+\subsection{Analysestrategie}\label{analysestrategie}
+
+Zur beantfortung der Fragen werden zuerst verschiedene Daten benötigt:
+
+\begin{itemize}
+\item
+  Das Herkunftsland des Weines
+\item
+  Der Name bzw. ein eindeutig zuzuweisender Parameter
+\item
+  Die erhaltenen Punkte
+\item
+  Der Preis
+\item
+  Die Weinproduktion der jeweiligen Länder insgesammt
+\item
+  Name des Testers
+\end{itemize}
+
+Es gibt weiterhin Faktoren die aus den gegebenen Daten errechnet werden
+müsse:
+
+\begin{itemize}
+\item
+  Die Anzahl der Weine je Land
+\item
+  Der Durchschnitsspreis von weinen je Land sowie die Punkteanzahl
+\item
+  Das Verhältnis des Preis- und Punktedurchschnits je Land
+\item
+  Die Ähnlichkeit bzw. Relation der verschiedenen Länder im Bezug auf
+  die Anzahl der Weine
+\item
+  Die Anzahl der getesteten Weine je nach Tester und Land
+\end{itemize}
+
+Der Großteil der Fragen lässt sich vor allem durch eine quantitative
+Datenanalyse beantworten, für Frage 4 ist es jedoch effektiver ein
+Netzwerk zu erstellen da dort die Relationen der länder Miteinander
+besser zur geltung kommen, des weiteren können so Cluster identifiziert
+werden welche weitere Rückschlüsse erlauben. Auch Frage 6 ist mit einem
+Netzwerk am besten zu veranschaulichen.
+
+\subsection{Analyse des Datensatzes}\label{analyse-des-datensatzes}
+
+\subsubsection{Data Exploration \&
+Cleaning}\label{data-exploration-cleaning}
+
+Zuerst muss der Datensatz ``winemag-data-130k-v2.csv'' welcher die Daten
+für die Bewertungen der verschiedenen Weine enthält geladen werden.
+Ebenfalls wird der zweite Datensatz zur anreicherung geladen und
+formatiert.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# loading the data and assigning the date to the working Dataframe}
+\CommentTok{\# setzen der benötigten Packages }
 \FunctionTok{library}\NormalTok{(readr)}
 \FunctionTok{library}\NormalTok{(dplyr)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 
-## Attaching package: 'dplyr'
-\end{verbatim}
-
-\begin{verbatim}
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-\end{verbatim}
-
-\begin{verbatim}
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(igraph)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 
-## Attaching package: 'igraph'
-\end{verbatim}
-
-\begin{verbatim}
-## The following objects are masked from 'package:dplyr':
-## 
-##     as_data_frame, groups, union
-\end{verbatim}
-
-\begin{verbatim}
-## The following objects are masked from 'package:stats':
-## 
-##     decompose, spectrum
-\end{verbatim}
-
-\begin{verbatim}
-## The following object is masked from 'package:base':
-## 
-##     union
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{winemag\_data\_130k\_v2 }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"/Users/john{-}thomas/Desktop/UNI/SNA/SocialNetworkAnalysis/src/Main/Data/archive/winemag{-}data{-}130k{-}v2.csv"}\NormalTok{,}\AttributeTok{show\_col\_types =} \ConstantTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## New names:
-## * `` -> `...1`
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(gridExtra)}
+\CommentTok{\# laden des Datensatzes}
+\NormalTok{winemag\_data\_130k\_v2 }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"winemag{-}data{-}130k{-}v2.csv"}\NormalTok{,}\AttributeTok{show\_col\_types =} \ConstantTok{FALSE}\NormalTok{)}
+\CommentTok{\# zuweisen des Datensatzes zu einem neue Data Frame zur weiterverarbeitung}
 \NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ winemag\_data\_130k\_v2}
+
+\CommentTok{\# zweiten Datensatz laden und umwandeln um ihn in der anschließenden Analyse Nutzen zu können}
+\NormalTok{wineproduction\_data\_2023 }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"wine{-}producing{-}countries{-}2023.csv"}\NormalTok{)}
+\NormalTok{df\_wine\_prod }\OtherTok{\textless{}{-}} \FunctionTok{na.omit}\NormalTok{(}\FunctionTok{select}\NormalTok{(wineproduction\_data\_2023, country, wineProducingCountries\_wineProduction))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# lets take a first look at the Dataset by checking the first 10 columns}
-\FunctionTok{head}\NormalTok{(df)}
+\CommentTok{\# um einen ersten Überblick zu erhalten werden mit head(df,10) die ersten 10 Zeilen ausgegeben}
+\FunctionTok{head}\NormalTok{(df,}\DecValTok{10}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## # A tibble: 6 x 14
-##    ...1 country  description designation points price province region_1 region_2
-##   <dbl> <chr>    <chr>       <chr>        <dbl> <dbl> <chr>    <chr>    <chr>   
-## 1     0 Italy    Aromas inc~ Vulkà Bian~     87    NA Sicily ~ Etna     <NA>    
-## 2     1 Portugal This is ri~ Avidagos        87    15 Douro    <NA>     <NA>    
-## 3     2 US       Tart and s~ <NA>            87    14 Oregon   Willame~ Willame~
-## 4     3 US       Pineapple ~ Reserve La~     87    13 Michigan Lake Mi~ <NA>    
-## 5     4 US       Much like ~ Vintner's ~     87    65 Oregon   Willame~ Willame~
-## 6     5 Spain    Blackberry~ Ars In Vit~     87    15 Norther~ Navarra  <NA>    
+## # A tibble: 10 x 14
+##     ...1 country description designation points price province region_1 region_2
+##    <dbl> <chr>   <chr>       <chr>        <dbl> <dbl> <chr>    <chr>    <chr>   
+##  1     0 Italy   Aromas inc~ Vulkà Bian~     87    NA Sicily ~ Etna     <NA>    
+##  2     1 Portug~ This is ri~ Avidagos        87    15 Douro    <NA>     <NA>    
+##  3     2 US      Tart and s~ <NA>            87    14 Oregon   Willame~ Willame~
+##  4     3 US      Pineapple ~ Reserve La~     87    13 Michigan Lake Mi~ <NA>    
+##  5     4 US      Much like ~ Vintner's ~     87    65 Oregon   Willame~ Willame~
+##  6     5 Spain   Blackberry~ Ars In Vit~     87    15 Norther~ Navarra  <NA>    
+##  7     6 Italy   Here's a b~ Belsito         87    16 Sicily ~ Vittoria <NA>    
+##  8     7 France  This dry a~ <NA>            87    24 Alsace   Alsace   <NA>    
+##  9     8 Germany Savory dri~ Shine           87    12 Rheinhe~ <NA>     <NA>    
+## 10     9 France  This has g~ Les Natures     87    27 Alsace   Alsace   <NA>    
 ## # i 5 more variables: taster_name <chr>, taster_twitter_handle <chr>,
 ## #   title <chr>, variety <chr>, winery <chr>
 \end{verbatim}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{df\_Countries }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(df[}\StringTok{\textquotesingle{}country\textquotesingle{}}\NormalTok{]))}
-\end{Highlighting}
-\end{Shaded}
+Nachdem der Datensatz nun schonmal exemplarisch geladen ist, kann man
+sehen das dieser 14 verschiedene Spalten hat.
+
+Diese sind:
+
+\begin{itemize}
+\item
+  country
+\item
+  description
+\item
+  designation
+\item
+  points
+\item
+  price
+\item
+  province
+\item
+  region\_1
+\item
+  region\_2
+\item
+  taster\_name
+\item
+  taster\_twitter\_handle
+\item
+  tittle
+\item
+  variety
+\item
+  winery
+\end{itemize}
+
+Für unsere Analyse verwenden wir jedoch nur die folgenden Spalten:
+
+\begin{itemize}
+\item
+  country
+\item
+  points
+\item
+  price
+\item
+  taster\_name
+\end{itemize}
+
+\subsubsection{Frage 1 - Welches Land stellt die meisten der bewerteten
+Weine?}\label{frage-1---welches-land-stellt-die-meisten-der-bewerteten-weine}
+
+Um herrauszufinden welches Land die meisten Weine in der Bewertung
+stellt müssen wir zuerst die Spalten ``country'' sowie ``title'' aus dem
+Haupt Dataframe (df) extrahieren. Nun können die Weine je nach Land
+aufsummiert werden und in einem Balkendiagramm veranschaulicht werden.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Countries in Asia}
+\CommentTok{\# Neuen Dataframe mit den Spalten "country" und "title" bilden}
+\NormalTok{df\_WW }\OtherTok{\textless{}{-}} \FunctionTok{na.omit}\NormalTok{(}\FunctionTok{select}\NormalTok{(df, country, title))}
+\CommentTok{\# Anzahl der Einträge je Land zählen }
+\NormalTok{df\_WW\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_WW}\SpecialCharTok{$}\NormalTok{country))}
+\CommentTok{\# Dataframe absteigend sortieren}
+\NormalTok{df\_WW\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_WW\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_WW\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
+
+\CommentTok{\# Plot der Top 10 Länder erstellen um die prominenteste Nation zu finden}
+\FunctionTok{ggplot}\NormalTok{(df\_WW\_wines\_by\_country[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{,], }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Var1, }\AttributeTok{y =}\NormalTok{ Freq)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"blue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Herkunftsländer bewerteter Weine"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Land"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Anzahl"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Name des Landes und Anzahl der weine ausgeben}
+\FunctionTok{print}\NormalTok{(df\_WW\_wines\_by\_country)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                      Var1  Freq
+## 43                     US 54504
+## 16                 France 22093
+## 23                  Italy 19540
+## 38                  Spain  6645
+## 32               Portugal  5691
+## 9                   Chile  4472
+## 1               Argentina  3800
+## 4                 Austria  3345
+## 3               Australia  2329
+## 18                Germany  2165
+## 30            New Zealand  1419
+## 37           South Africa  1401
+## 22                 Israel   505
+## 19                 Greece   466
+## 8                  Canada   257
+## 20                Hungary   146
+## 7                Bulgaria   141
+## 33                Romania   120
+## 42                Uruguay   109
+## 40                 Turkey    90
+## 36               Slovenia    87
+## 17                Georgia    86
+## 15                England    74
+## 11                Croatia    73
+## 27                 Mexico    70
+## 28                Moldova    59
+## 6                  Brazil    52
+## 24                Lebanon    35
+## 29                Morocco    28
+## 31                   Peru    16
+## 41                Ukraine    14
+## 13         Czech Republic    12
+## 26              Macedonia    12
+## 34                 Serbia    12
+## 12                 Cyprus    11
+## 21                  India     9
+## 39            Switzerland     7
+## 25             Luxembourg     6
+## 2                 Armenia     2
+## 5  Bosnia and Herzegovina     2
+## 10                  China     1
+## 14                  Egypt     1
+## 35               Slovakia     1
+\end{verbatim}
+
+Nachdem man das Diagram sowei die Ausgabe aus der Kosole betrachtet,
+sieht man das die USA mit: 54504 das Land sind welche die meisten Weine
+Stellen.
+
+\subsubsection{Frage 2 - Welches Land bekommt durchschnittlich die
+besten
+bewertungen?}\label{frage-2---welches-land-bekommt-durchschnittlich-die-besten-bewertungen}
+
+Um zu errechnen welches Land durschnittlich die beste Punktzahl erhält
+müssen wir zuerts einen Dataframe erzeugen welcher die Spalten:
+``country'', ``points'' und ``title'' enthält.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Erzeugen des Dataframes}
+\NormalTok{df\_WW\_points }\OtherTok{\textless{}{-}} \FunctionTok{na.omit}\NormalTok{(}\FunctionTok{select}\NormalTok{(df, country,points,title))}
+\NormalTok{df\_WW\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_WW\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(df\_WW\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Var1),]}
+\CommentTok{\# Aggregation der Werte sowie die Berechnung der Durchschnittlichen Punkte Anzahl}
+\NormalTok{df\_WW\_points\_avg }\OtherTok{\textless{}{-}} \FunctionTok{aggregate}\NormalTok{(df\_WW\_points}\SpecialCharTok{$}\NormalTok{points, }\FunctionTok{list}\NormalTok{(df\_WW\_points}\SpecialCharTok{$}\NormalTok{country), }\AttributeTok{FUN=}\NormalTok{mean)}
+\CommentTok{\# Alphabetisches Sortieren des DF}
+\NormalTok{df\_WW\_points\_avg }\OtherTok{\textless{}{-}}\NormalTok{ df\_WW\_points\_avg[}\FunctionTok{order}\NormalTok{(df\_WW\_points\_avg}\SpecialCharTok{$}\NormalTok{Group}\FloatTok{.1}\NormalTok{),]}
+\CommentTok{\# visualisiserung der Verteilung der Punktedurchschnitte}
+\FunctionTok{boxplot}\NormalTok{(df\_WW\_points\_avg}\SpecialCharTok{$}\NormalTok{x)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+Durch diesen Boxplot kann man sehen das der Durchschnitt der
+durschnittlichen Punktezahl bei ca. 87.65 liegt, es gibt weiterhin
+outlier die von \textless84 bis \textgreater90 liegen. Um dies besser zu
+veranschaulichen bedarf es jedoch einer anderen Visualisierungsform wie
+beispielsweise einem Balkendiagramm.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(df\_WW\_points\_avg[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{,], }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Group}\FloatTok{.1}\NormalTok{, }\AttributeTok{y =}\NormalTok{ x)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"blue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Herkunftsländer bewerteter Weine"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Land"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Durschnittliche Punkte"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Absteigend sortieren und ausgeben des DF}
+\FunctionTok{print}\NormalTok{(}\FunctionTok{head}\NormalTok{(df\_WW\_points\_avg[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_WW\_points\_avg}\SpecialCharTok{$}\NormalTok{x),],}\DecValTok{20}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         Group.1        x
+## 15      England 91.58108
+## 21        India 90.22222
+## 4       Austria 90.10135
+## 18      Germany 89.85173
+## 8        Canada 89.36965
+## 20      Hungary 89.19178
+## 10        China 89.00000
+## 16       France 88.84511
+## 25   Luxembourg 88.66667
+## 3     Australia 88.58051
+## 29      Morocco 88.57143
+## 39  Switzerland 88.57143
+## 43           US 88.56372
+## 23        Italy 88.56223
+## 22       Israel 88.47129
+## 30  New Zealand 88.30303
+## 32     Portugal 88.25022
+## 40       Turkey 88.08889
+## 36     Slovenia 88.06897
+## 37 South Africa 88.05639
+\end{verbatim}
+
+Nun ist zu erkennen das nachdem man das Balkendiagram sowie die Ausgabe
+in der Konsole betrachtet das England das Land mit der höchsten
+durschnittlichen punktzahl ist. Hierbei ist es nun jedoch wichtig zu
+betrachten das dieser Wert wohlmöglich aufgrund der relativ niedriegen
+Anzahl der aus England stammenden bewerteten Weine verzehrt ist. Um nun
+zu betrachten wie sehr sich die Punktzahlen um den Durschnitt streuen
+betrachten wir außerdem den Standartfehler (SEM) dieser zeigt uns welche
+abweichung vom Durschnitt zu erwarten sind.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Standardtabweichnung berechnene}
+\NormalTok{df\_WW\_points\_SEM }\OtherTok{\textless{}{-}} \FunctionTok{aggregate}\NormalTok{(df\_WW\_points}\SpecialCharTok{$}\NormalTok{points, }\FunctionTok{list}\NormalTok{(df\_WW\_points}\SpecialCharTok{$}\NormalTok{country), }\AttributeTok{FUN=}\NormalTok{sd)}
+\CommentTok{\# SEM berechnen}
+\NormalTok{df\_WW\_points\_SEM}\SpecialCharTok{$}\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ df\_WW\_points\_SEM}\SpecialCharTok{$}\NormalTok{x }\SpecialCharTok{/} \FunctionTok{sqrt}\NormalTok{(df\_WW\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq)}
+\CommentTok{\#DF absteigend sortieren}
+\NormalTok{df\_WW\_points\_SEM }\OtherTok{\textless{}{-}}\NormalTok{ df\_WW\_points\_SEM[}\FunctionTok{order}\NormalTok{(df\_WW\_points\_SEM}\SpecialCharTok{$}\NormalTok{x),]}
+\CommentTok{\# Balkendiagramm der top 10 erstellen }
+\FunctionTok{ggplot}\NormalTok{(df\_WW\_points\_SEM[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{,], }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Group}\FloatTok{.1}\NormalTok{, }\AttributeTok{y =}\NormalTok{ x)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"blue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Durchschnittliche"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Land"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Durchschnittliche Abweichung"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(}\FunctionTok{head}\NormalTok{(df\_WW\_points\_SEM))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##     Group.1          x
+## 43       US 0.01334202
+## 23    Italy 0.01895586
+## 16   France 0.02048225
+## 38    Spain 0.03761533
+## 32 Portugal 0.03971597
+## 9     Chile 0.04026974
+\end{verbatim}
+
+Ziehen wir nun mit in betracht das auch eine geringe Abweichung der
+gegebenen Werte vom Durchschnitt eine wichte Rolle spielt so können wir
+feststellen das die USA das Land sind bei welchem die geringste
+Abweichung von der Durschnittlichen Punkte zu erwarten ist.
+
+Um die Frage zu beantworten ``Welches Land bekommt durschnittlich die
+besten Bewertungen?'' kann man also sagen das zwar England das Land mit
+dem höchsten durschnittlichen Score ist (91,581) jedoch die USA das Land
+sind bei welchem es die niedrigste zu erwartende Streuung vom Durschnitt
+gibt (0.0133).
+
+\subsubsection{Frage 3 - Welches Land hat das beste
+Punkte-Preis-Verhältnis?}\label{frage-3---welches-land-hat-das-beste-punkte-preis-verhuxe4ltnis}
+
+Um nun festzustellen welche Land das beste Preis zu Punkte Verhältnis
+hat werden wir den durschnittlichen Preis errechnene und dann durch die
+durschnittlichen Punkte teilen.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# erstellen des bebötigten DF zur berechnung des Durschnittspreis}
+\NormalTok{df\_WW\_price }\OtherTok{\textless{}{-}} \FunctionTok{select}\NormalTok{(df, country, price)}
+\NormalTok{df\_WW\_price}\SpecialCharTok{$}\NormalTok{price[}\FunctionTok{is.na}\NormalTok{(df\_WW\_price}\SpecialCharTok{$}\NormalTok{price)] }\OtherTok{\textless{}{-}}\FloatTok{0.0}
+\CommentTok{\# berechnung des Durschnittspreis}
+\NormalTok{df\_WW\_price\_avg }\OtherTok{\textless{}{-}} \FunctionTok{aggregate}\NormalTok{(df\_WW\_price}\SpecialCharTok{$}\NormalTok{price, }\FunctionTok{list}\NormalTok{(df\_WW\_price}\SpecialCharTok{$}\NormalTok{country), }\AttributeTok{FUN=}\NormalTok{mean)}
+\NormalTok{df\_WW\_price\_avg }\OtherTok{\textless{}{-}}\NormalTok{ df\_WW\_price\_avg[}\FunctionTok{order}\NormalTok{(df\_WW\_price\_avg}\SpecialCharTok{$}\NormalTok{Group}\FloatTok{.1}\NormalTok{),]}
+\CommentTok{\# erstellen der neuen Spalte für das Preis{-}Punkte{-}Verhältnis}
+\NormalTok{df\_WW\_price\_avg}\SpecialCharTok{$}\NormalTok{PPV }\OtherTok{\textless{}{-}}\NormalTok{ df\_WW\_points\_avg}\SpecialCharTok{$}\NormalTok{x }\SpecialCharTok{/}\NormalTok{ df\_WW\_price\_avg}\SpecialCharTok{$}\NormalTok{x}
+\CommentTok{\# sortieren nach PPV}
+\NormalTok{df\_WW\_price\_avg }\OtherTok{\textless{}{-}}\NormalTok{ df\_WW\_price\_avg[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_WW\_price\_avg}\SpecialCharTok{$}\NormalTok{PPV),]}
+
+\CommentTok{\# visualisieren der Ergebnisse sowie ausgabe in die Konsole}
+\FunctionTok{boxplot}\NormalTok{(df\_WW\_price\_avg}\SpecialCharTok{$}\NormalTok{PPV)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in bplt(at[i], wid = width[i], stats = z$stats[, i], out =
+## z$out[z$group == : Outlier (Inf) in boxplot 1 is not drawn
+\end{verbatim}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(df\_WW\_price\_avg)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                   Group.1         x      PPV
+## 14                  Egypt  0.000000      Inf
+## 41                Ukraine  9.214286 9.124031
+## 5  Bosnia and Herzegovina 12.500000 6.920000
+## 21                  India 13.333333 6.766667
+## 2                 Armenia 14.500000 6.034483
+## 7                Bulgaria 14.645390 6.004358
+## 33                Romania 15.241667 5.668671
+## 26              Macedonia 15.583333 5.572193
+## 35               Slovakia 16.000000 5.437500
+## 12                 Cyprus 16.272727 5.357542
+## 28                Moldova 16.745763 5.207490
+## 10                  China 18.000000 4.944444
+## 17                Georgia 18.872093 4.646334
+## 31                   Peru 18.062500 4.626298
+## 29                Morocco 19.500000 4.542125
+## 9                   Chile 20.526163 4.213818
+## 19                 Greece 22.124464 3.945102
+## 6                  Brazil 21.480769 3.941808
+## 32               Portugal 22.458970 3.929397
+## 37           South Africa 22.767309 3.867668
+## 36               Slovenia 22.816092 3.859950
+## 25             Luxembourg 23.333333 3.800000
+## 13         Czech Republic 24.250000 3.597938
+## 1               Argentina 24.226316 3.579177
+## 40                 Turkey 24.633333 3.576004
+## 34                 Serbia 24.500000 3.571429
+## 11                Croatia 24.753425 3.523520
+## 4                 Austria 25.741405 3.500250
+## 30            New Zealand 26.153629 3.376320
+## 42                Uruguay 26.403670 3.285615
+## 27                 Mexico 26.785714 3.182933
+## 38                  Spain 27.909556 3.127543
+## 22                 Israel 30.762376 2.875958
+## 24                Lebanon 30.685714 2.857542
+## 16                 France 33.100484 2.684103
+## 23                  Italy 34.333316 2.579484
+## 3               Australia 34.905109 2.537752
+## 8                  Canada 35.295720 2.532025
+## 43                     US 36.413089 2.432195
+## 20                Hungary 40.369863 2.209365
+## 18                Germany 41.379215 2.171422
+## 15                England 48.189189 1.900449
+## 39            Switzerland 85.285714 1.038526
+\end{verbatim}
+
+Wir können nun sehen das die Ukraine das Land ist wessen Weine das beste
+Punkte-Preis-Verhältnis aufweisen (9,124), hierbei ist jedoch erneut zu
+beachten das die Sample Size eine wichtige rolle Spielt und
+möglicherweise das Ergebnis verzehrt. Das schlechteste Verhältnis hat
+die Schweiz mit ca. 1,039. Der durschnittliche Score liegt bei ca. 3,8.
+
+\subsubsection{Frage 4 - Stimmt die Verteilung der bewerteten Weine mit
+der weltweiten Produktion (je Land) von Wein
+überein?}\label{frage-4---stimmt-die-verteilung-der-bewerteten-weine-mit-der-weltweiten-produktion-je-land-von-wein-uxfcberein}
+
+Um herrauszufinden ob die Herkunft der bewerteten Weine mit der
+Produktion von wein zusammenhängt verwenden wir hier einen 2. Datensatz
+welcher die weltweite Produktion von Wein abbildet.
+
+Zuerst müssen wir nun die Verteilung der weltweiten Weinporduktion
+betrachten und danach mit der Anzahl der bewerteten Weine vergleichen.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# festlegen der Zahlennotation}
+\FunctionTok{options}\NormalTok{(}\AttributeTok{scipen =} \DecValTok{999}\NormalTok{)}
+\CommentTok{\# Berechnen der Anteile der verschiedenen Länder an der weltweiten Weinproduktion in Prozent}
+\NormalTok{df\_wine\_prod}\SpecialCharTok{$}\NormalTok{percent }\OtherTok{\textless{}{-}}\NormalTok{ df\_wine\_prod}\SpecialCharTok{$}\NormalTok{wineProducingCountries\_wineProduction}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(df\_wine\_prod}\SpecialCharTok{$}\NormalTok{wineProducingCountries\_wineProduction) }\SpecialCharTok{*} \DecValTok{100}
+\CommentTok{\# Das selbe für die bewerteten Weine}
+\NormalTok{df\_WW\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{percent }\OtherTok{\textless{}{-}}\NormalTok{df\_WW\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(df\_WW\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq) }\SpecialCharTok{*} \DecValTok{100}
+\CommentTok{\# DF sortieren}
+\NormalTok{df\_wine\_prod }\OtherTok{\textless{}{-}}\NormalTok{ df\_wine\_prod[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_wine\_prod}\SpecialCharTok{$}\NormalTok{percent),]}
+\NormalTok{df\_WW\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_WW\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_WW\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{percent),]}
+
+\CommentTok{\# Kuchendiagramm für die weltweiten Daten}
+\NormalTok{pie\_WW\_prod }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(df\_wine\_prod[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{,], }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \StringTok{""}\NormalTok{, }\AttributeTok{y =}\NormalTok{ percent, }\AttributeTok{fill =}\NormalTok{ country)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{width =} \DecValTok{1}\NormalTok{, }\AttributeTok{color =} \StringTok{"white"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_polar}\NormalTok{(}\StringTok{"y"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_void}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"Anteile an der weltweiten Weinproduktion je Land"}\NormalTok{)}
+
+\CommentTok{\# Kuchendiagramm für die Weine aus dem Review{-}Datensatz}
+\NormalTok{pie\_WW\_set }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(df\_WW\_wines\_by\_country[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{,], }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \StringTok{""}\NormalTok{, }\AttributeTok{y =}\NormalTok{ percent, }\AttributeTok{fill =}\NormalTok{ Var1)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{, }\AttributeTok{width =} \DecValTok{1}\NormalTok{, }\AttributeTok{color =} \StringTok{"white"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_polar}\NormalTok{(}\StringTok{"y"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_void}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{ggtitle}\NormalTok{(}\StringTok{"Anteile der Weine im Datensatz je Land"}\NormalTok{)}
+
+\FunctionTok{grid.arrange}\NormalTok{(pie\_WW\_prod, pie\_WW\_set, }\AttributeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+Hier können wir nun beobachten das das Verhältnis der bewerteten Weine
+sich deutlich von dem der tatsächlichen weltweite Produktion
+unterscheidet. Diese Disparität kann vielerlei Gründe haben, zum einen
+ist das Magazin von welchem die Daten erhoben wurden Amerekanisch
+weshalb ein gewisser Bias in die Richtung zu erwarten war. Die anderen
+Unterschiede jedoch sind schwerer zu erklären wie zum Beispiel das
+Australien der weltweit fünft größte Weinproduzent ist jedoch bei den
+bewerteten Weinen nicht unter den Top 5 auftritt. Desweiteren werden
+anscheinend überproportional mehr Portugisische Weine bewertet als
+Portugal insgesammt anteilig produziert.
+
+\subsubsection{Frage 5 - In welcher Relationen stehen die Länder in
+Bezug auf die Anzahl der bewerteten Weine
+zueinander?}\label{frage-5---in-welcher-relationen-stehen-die-luxe4nder-in-bezug-auf-die-anzahl-der-bewerteten-weine-zueinander}
+
+Um herrauszufinden in welcher Relation die verschiedenen Länder
+zueinander stehen, im Bezug auf den Anteil ihrer Weine im Datensatz
+müssen wir die Daten zuerst nach Kontinent sortieren um sie dann weiter
+zu verarbeiten. Dadurch das wir so viele verschiedene Länder und
+verbindungen haben ist es sinvoller Subnetze für die verschiednen
+Kontinente zu erstellen da so eine bessere übersicht herscht.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# zuerst legen wir listen mit allen Länder je kontinent an um anschließend die Daten zu vergleichen, hierbei ist darauf zu achten das die Namen der Länder im Datensatz exact die selben wie in den Listen ist}
+
+\CommentTok{\# Länder in Asien}
 \NormalTok{asia\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
   \StringTok{"Afghanistan"}\NormalTok{, }\StringTok{"Armenia"}\NormalTok{, }\StringTok{"Azerbaijan"}\NormalTok{, }\StringTok{"Bahrain"}\NormalTok{, }\StringTok{"Bangladesh"}\NormalTok{, }\StringTok{"Bhutan"}\NormalTok{, }
   \StringTok{"Brunei"}\NormalTok{, }\StringTok{"Cambodia"}\NormalTok{, }\StringTok{"China"}\NormalTok{, }\StringTok{"Cyprus"}\NormalTok{, }\StringTok{"Georgia"}\NormalTok{, }\StringTok{"India"}\NormalTok{, }\StringTok{"Indonesia"}\NormalTok{, }
@@ -230,7 +681,7 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
   \StringTok{"Vietnam"}\NormalTok{, }\StringTok{"Yemen"}
 \NormalTok{)}
 
-\CommentTok{\# Countries in Europe}
+\CommentTok{\# Länder in Europa}
 \NormalTok{europe\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
   \StringTok{"Albania"}\NormalTok{, }\StringTok{"Andorra"}\NormalTok{, }\StringTok{"Austria"}\NormalTok{, }\StringTok{"Belarus"}\NormalTok{, }\StringTok{"Belgium"}\NormalTok{, }
   \StringTok{"Bosnia and Herzegovina"}\NormalTok{, }\StringTok{"Bulgaria"}\NormalTok{, }\StringTok{"Croatia"}\NormalTok{, }\StringTok{"Cyprus"}\NormalTok{, }
@@ -244,7 +695,7 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
   \StringTok{"Vatican City"}
 \NormalTok{)}
 
-\CommentTok{\# Countries in Africa}
+\CommentTok{\# Länder in Afrika}
 \NormalTok{africa\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
   \StringTok{"Algeria"}\NormalTok{, }\StringTok{"Angola"}\NormalTok{, }\StringTok{"Benin"}\NormalTok{, }\StringTok{"Botswana"}\NormalTok{, }\StringTok{"Burkina Faso"}\NormalTok{, }\StringTok{"Burundi"}\NormalTok{, }
   \StringTok{"Cabo Verde"}\NormalTok{, }\StringTok{"Cameroon"}\NormalTok{, }\StringTok{"Central African Republic"}\NormalTok{, }\StringTok{"Chad"}\NormalTok{, }
@@ -259,7 +710,7 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
   \StringTok{"Zambia"}\NormalTok{, }\StringTok{"Zimbabwe"}
 \NormalTok{)}
 
-\CommentTok{\# Countries in North America}
+\CommentTok{\# Länder in Nord Amerika}
 \NormalTok{north\_america\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
   \StringTok{"Canada"}\NormalTok{, }\StringTok{"US"}\NormalTok{, }\StringTok{"Mexico"}\NormalTok{, }\StringTok{"Guatemala"}\NormalTok{, }\StringTok{"Honduras"}\NormalTok{, }
   \StringTok{"El Salvador"}\NormalTok{, }\StringTok{"Nicaragua"}\NormalTok{, }\StringTok{"Costa Rica"}\NormalTok{, }\StringTok{"Panama"}\NormalTok{, }\StringTok{"Belize"}\NormalTok{, }
@@ -269,51 +720,54 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
   \StringTok{"Saint Kitts and Nevis"}
 \NormalTok{)}
 
-\CommentTok{\# Countries in South America}
+\CommentTok{\# Länder in Süd Amerika}
 \NormalTok{south\_america\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
   \StringTok{"Argentina"}\NormalTok{, }\StringTok{"Brazil"}\NormalTok{, }\StringTok{"Chile"}\NormalTok{, }\StringTok{"Colombia"}\NormalTok{, }\StringTok{"Ecuador"}\NormalTok{, }\StringTok{"Peru"}\NormalTok{, }
   \StringTok{"Bolivia"}\NormalTok{, }\StringTok{"Paraguay"}\NormalTok{, }\StringTok{"Uruguay"}\NormalTok{, }\StringTok{"Venezuela"}\NormalTok{, }\StringTok{"Guyana"}\NormalTok{, }\StringTok{"Suriname"}\NormalTok{, }
   \StringTok{"French Guiana"}\NormalTok{, }\StringTok{"Falkland Islands"}
 \NormalTok{)}
 
-\CommentTok{\# Countries in Oceania}
+\CommentTok{\# Länder in Ozianien}
 \NormalTok{oceania\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
   \StringTok{"Australia"}\NormalTok{, }\StringTok{"New Zealand"}\NormalTok{, }\StringTok{"Fiji"}\NormalTok{, }\StringTok{"Papua New Guinea"}\NormalTok{, }
   \StringTok{"Solomon Islands"}\NormalTok{, }\StringTok{"Vanuatu"}\NormalTok{, }\StringTok{"New Caledonia"}\NormalTok{, }\StringTok{"French Polynesia"}\NormalTok{, }
   \StringTok{"Samoa"}\NormalTok{, }\StringTok{"Tonga"}\NormalTok{, }\StringTok{"Kiribati"}\NormalTok{, }\StringTok{"Tuvalu"}\NormalTok{, }\StringTok{"Micronesia"}\NormalTok{, }
   \StringTok{"Marshall Islands"}\NormalTok{, }\StringTok{"Palau"}\NormalTok{, }\StringTok{"Nauru"}
 \NormalTok{)}
-\CommentTok{\#South America}
+
+\CommentTok{\# zuerst werden die spalte country in df mit den länderlisten abgegleicht, trift die Kondition zu so werden sie dem jeweiligen neun Kontinenten df zugewiesen}
+
+\CommentTok{\# Süd Amerika}
 \NormalTok{df\_SA }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ south\_america\_countries,]}
 \NormalTok{df\_SA\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_SA}\SpecialCharTok{$}\NormalTok{country))}
 \NormalTok{df\_SA\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_SA\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_SA\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
 
-\CommentTok{\#Europe}
+\CommentTok{\# Europa }
 \NormalTok{df\_EU }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ europe\_countries,]}
 \NormalTok{df\_EU\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_EU}\SpecialCharTok{$}\NormalTok{country))}
 \NormalTok{df\_EU\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_EU\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
 
-\CommentTok{\#North America}
+\CommentTok{\# Nord Amerika}
 \NormalTok{df\_NA }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ north\_america\_countries,]}
 \NormalTok{df\_NA\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_NA}\SpecialCharTok{$}\NormalTok{country))}
 \NormalTok{df\_NA\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_NA\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_NA\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
 
-\CommentTok{\#Africa}
+\CommentTok{\# Afrika}
 \NormalTok{df\_AF }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ africa\_countries,]}
 \NormalTok{df\_AF\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_AF}\SpecialCharTok{$}\NormalTok{country))}
 \NormalTok{df\_AF\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_AF\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_AF\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
 
-\CommentTok{\# Ociania}
+\CommentTok{\# Ozianien}
 \NormalTok{df\_OZ }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ oceania\_countries,]}
 \NormalTok{df\_OZ\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_OZ}\SpecialCharTok{$}\NormalTok{country))}
 \NormalTok{df\_OZ\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_OZ\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_OZ\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
 
-\CommentTok{\#Asia}
+\CommentTok{\# Asien }
 \NormalTok{df\_AS }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{country }\SpecialCharTok{\%in\%}\NormalTok{ asia\_countries,]}
 \NormalTok{df\_AS\_wines\_by\_country }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{table}\NormalTok{(df\_AS}\SpecialCharTok{$}\NormalTok{country))}
 \NormalTok{df\_AS\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{df\_AS\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Freq),]}
 
-\CommentTok{\#renaming the columns}
+\CommentTok{\# hier werden nun die Spalten jeweils umbenannt um besser mit ihnen weiterarbeiten zu können }
 \NormalTok{df\_SA\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_SA\_wines\_by\_country }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Var1, }\AttributeTok{Weight =}\NormalTok{ Freq)}
 \NormalTok{df\_EU\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Var1, }\AttributeTok{Weight =}\NormalTok{ Freq)}
 \NormalTok{df\_NA\_wines\_by\_country }\OtherTok{\textless{}{-}}\NormalTok{ df\_NA\_wines\_by\_country }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{rename}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Var1, }\AttributeTok{Weight =}\NormalTok{ Freq)}
@@ -323,56 +777,78 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
 \end{Highlighting}
 \end{Shaded}
 
+Der nächste Schritt ist nun die Graphen für die jeweiligen Kontinente zu
+erstellen. Das verfahren wird nun exemplarisch an Süd Amerika
+veranschaulicht, die anderen Graphen werden auf die exakt selbe Weise
+erstellt.
+
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{\# adjancy matrix erstellen}
 \NormalTok{adj\_SA }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
 \NormalTok{)}
-\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country)}
-\NormalTok{z}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country)}
-\ControlFlowTok{while}\NormalTok{ (i}\SpecialCharTok{\textgreater{}=}\DecValTok{0}\NormalTok{) \{}
-  
-  
-\NormalTok{    country\_1 }\OtherTok{=}\NormalTok{ df\_SA\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
-    
-\NormalTok{    country\_2 }\OtherTok{=}\NormalTok{ df\_SA\_wines\_by\_country[z,}\DecValTok{1}\NormalTok{]}
-    
-\NormalTok{    adj }\OtherTok{=} 
-      \FunctionTok{ifelse}\NormalTok{(      }
-        \FunctionTok{ifelse}\NormalTok{(}
-\NormalTok{          df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{1000}\NormalTok{,}
-        \DecValTok{0}\NormalTok{, }
-        \FunctionTok{ifelse}\NormalTok{(}
-\NormalTok{          df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
-\NormalTok{      )}
-    
- 
+\CommentTok{\# zähler für die folgende While schleife aufsetzen}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country)}
+\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country)}
 
-\NormalTok{adj\_SA }\OtherTok{\textless{}{-}}\NormalTok{ adj\_SA }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_row}\NormalTok{(country\_1,country\_2,adj)}
-\NormalTok{    z }\OtherTok{=}\NormalTok{ z}\DecValTok{{-}1}
-  \ControlFlowTok{if}\NormalTok{(z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)\{}
-\NormalTok{    i }\OtherTok{=}\NormalTok{ i}\DecValTok{{-}1}
-\NormalTok{    z }\OtherTok{=} \FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country)}
+\CommentTok{\#zuweisen der Länder zueinander damit jede beziehung zwischen jedem Land berechnet werden kann }
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }
+
+\NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
+\NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_SA\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
+
+  \CommentTok{\# adjacency berechnen, wie ähnlch die Anzahl der weine ist}
+\NormalTok{  adj }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}
+    \FunctionTok{ifelse}\NormalTok{(df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{10}\NormalTok{,}
+    \ConstantTok{NA}\NormalTok{,}
+    \FunctionTok{ifelse}\NormalTok{(df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_SA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_SA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{  )}
+
+  \CommentTok{\# Reihe formatieren und in die Matrix einfügen}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{country\_1 =}\NormalTok{ country\_1, }\AttributeTok{country\_2 =}\NormalTok{ country\_2, }\AttributeTok{adj =}\NormalTok{ adj)}
+\NormalTok{  adj\_SA }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_SA, row\_data)}
+
+  \CommentTok{\# Counter setzen}
+\NormalTok{  z }\OtherTok{\textless{}{-}}\NormalTok{ z }\SpecialCharTok{{-}} \DecValTok{1}
+
+  \ControlFlowTok{if}\NormalTok{ (z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{    z }\OtherTok{\textless{}{-}}\NormalTok{ i}
 \NormalTok{  \}}
 \NormalTok{\}}
-\NormalTok{graph\_SA }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(adj\_SA, }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
+\CommentTok{\# NA Werte entfernen und den leeren Graphen erstellen}
+\NormalTok{adj\_SA }\OtherTok{\textless{}{-}}\FunctionTok{na.omit}\NormalTok{(adj\_SA)}
+\NormalTok{graph\_SA }\OtherTok{\textless{}{-}} \FunctionTok{graph.empty}\NormalTok{()}
 
-\CommentTok{\# Get the adjacency matrix}
-\NormalTok{adj\_matrix\_SA }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_SA, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
+\CommentTok{\# größe der Nodes berechnen (nach totaler Anzahl der Weine)}
+\NormalTok{vertex\_size\_SA }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =} \FunctionTok{character}\NormalTok{(),}\AttributeTok{Size =} \FunctionTok{numeric}\NormalTok{())}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country)}
+\ControlFlowTok{while}\NormalTok{(i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{  Country }\OtherTok{=}\NormalTok{ df\_SA\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  Size }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(df\_SA\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{100} \SpecialCharTok{\textgreater{}} \DecValTok{2}\NormalTok{, (df\_SA\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000}\NormalTok{)}\SpecialCharTok{+}\DecValTok{7}\NormalTok{, }\DecValTok{7}\NormalTok{)}
+  \FunctionTok{add\_row}\NormalTok{(vertex\_size\_SA, }\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Size=}\FunctionTok{numeric}\NormalTok{())}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\NormalTok{Country,}\AttributeTok{Size=}\NormalTok{Size)}
+\NormalTok{  vertex\_size\_SA }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(vertex\_size\_SA,row\_data)}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{  vertex\_size\_SA }\OtherTok{\textless{}{-}}\NormalTok{ vertex\_size\_SA[}\FunctionTok{order}\NormalTok{(vertex\_size\_SA}\SpecialCharTok{$}\NormalTok{Size, }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{),]}
+\NormalTok{\}}
 
+\CommentTok{\# Nodes hinzufügen}
+\NormalTok{graph\_SA }\OtherTok{\textless{}{-}} \FunctionTok{add\_vertices}\NormalTok{(graph\_SA, }\AttributeTok{n =} \FunctionTok{nrow}\NormalTok{(df\_SA\_wines\_by\_country), }\AttributeTok{name =}\NormalTok{ df\_SA\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Country, }\AttributeTok{size =}\NormalTok{ vertex\_size\_SA}\SpecialCharTok{$}\NormalTok{Size)}
 
-\NormalTok{graph\_SA }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_SA, }\AttributeTok{mode =} \StringTok{"undirected"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{)}
-\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_kk}\NormalTok{(graph\_SA)}
-
-\CommentTok{\# Plot the graph}
-\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_SA), }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_SA)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"South America"}\NormalTok{, }\AttributeTok{layout =}\NormalTok{ layout)}
+\CommentTok{\# Edges hinzufügen}
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(adj\_SA)}
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{  graph\_SA }\OtherTok{\textless{}{-}} \FunctionTok{add\_edges}\NormalTok{(graph\_SA, }\AttributeTok{edges =} \FunctionTok{as.matrix}\NormalTok{(adj\_SA[i, }\FunctionTok{c}\NormalTok{(}\StringTok{"country\_1"}\NormalTok{, }\StringTok{"country\_2"}\NormalTok{)]))}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+  
+\NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
-
-\includegraphics{Report_files/figure-latex/unnamed-chunk-5-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -381,9 +857,8 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
 \NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country)}
 \NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country)}
 
-\NormalTok{adj\_EU }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{()  }\CommentTok{\# Initialize an empty tibble}
 
-\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }\CommentTok{\# Adjusted loop condition to avoid i = 0}
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }
 
 \NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
 \NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
@@ -391,14 +866,14 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
 \NormalTok{  adj }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}
     \FunctionTok{ifelse}\NormalTok{(df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
 \NormalTok{           df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{           df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{5}\NormalTok{,}
+\NormalTok{           df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{10}\NormalTok{,}
     \ConstantTok{NA}\NormalTok{,}
     \FunctionTok{ifelse}\NormalTok{(df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
 \NormalTok{           df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
 \NormalTok{           df\_EU\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_EU\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
 \NormalTok{  )}
 
-  \CommentTok{\# Create a tibble with the values and add it to adj\_AS}
+  
 \NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{country\_1 =}\NormalTok{ country\_1, }\AttributeTok{country\_2 =}\NormalTok{ country\_2, }\AttributeTok{adj =}\NormalTok{ adj)}
 \NormalTok{  adj\_EU }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_EU, row\_data)}
 
@@ -416,7 +891,7 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
 \NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country)}
 \ControlFlowTok{while}\NormalTok{(i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)\{}
 \NormalTok{  Country }\OtherTok{=}\NormalTok{ df\_EU\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
-\NormalTok{  Size }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(df\_EU\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000} \SpecialCharTok{\textgreater{}} \DecValTok{2}\NormalTok{, df\_EU\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{  Size }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(df\_EU\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000} \SpecialCharTok{\textgreater{}} \DecValTok{2}\NormalTok{, (df\_EU\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000}\NormalTok{)}\SpecialCharTok{+}\DecValTok{7}\NormalTok{, }\DecValTok{7}\NormalTok{)}
   \FunctionTok{add\_row}\NormalTok{(vertex\_size\_EU, }\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Size=}\FunctionTok{numeric}\NormalTok{())}
 \NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\NormalTok{Country,}\AttributeTok{Size=}\NormalTok{Size)}
 \NormalTok{  vertex\_size\_EU }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(vertex\_size\_EU,row\_data)}
@@ -426,118 +901,41 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
 
 \NormalTok{graph\_EU }\OtherTok{\textless{}{-}} \FunctionTok{add\_vertices}\NormalTok{(graph\_EU, }\AttributeTok{n =} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country), }\AttributeTok{name =}\NormalTok{ df\_EU\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Country, }\AttributeTok{size =}\NormalTok{ vertex\_size\_EU}\SpecialCharTok{$}\NormalTok{Size)}
 
-
-\NormalTok{colors\_EU }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Color=}\FunctionTok{character}\NormalTok{())}
-\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_EU\_wines\_by\_country)}
-
-\ControlFlowTok{while}\NormalTok{(i}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{)\{}
-\NormalTok{  generate\_random\_color }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{() \{}
-\NormalTok{  red }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
-\NormalTok{  green }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
-\NormalTok{  blue }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
-  \FunctionTok{return}\NormalTok{(}\FunctionTok{rgb}\NormalTok{(red, green, blue))}
-\NormalTok{  \}}
-  
-\NormalTok{  Country }\OtherTok{\textless{}{-}}\NormalTok{ df\_EU\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
-\NormalTok{  Color}\OtherTok{\textless{}{-}}\FunctionTok{generate\_random\_color}\NormalTok{()}
-  \FunctionTok{add\_row}\NormalTok{(colors\_EU,}\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{Color=}\FunctionTok{character}\NormalTok{())}
-\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i}\DecValTok{{-}1}
-\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Country, }\AttributeTok{Color =}\NormalTok{ Color)}
-\NormalTok{  colors\_EU }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(colors\_EU, row\_data)}
-\NormalTok{\}}
-
 \NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(adj\_EU)}
 \ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
 \NormalTok{  graph\_EU }\OtherTok{\textless{}{-}} \FunctionTok{add\_edges}\NormalTok{(graph\_EU, }\AttributeTok{edges =} \FunctionTok{as.matrix}\NormalTok{(adj\_EU[i, }\FunctionTok{c}\NormalTok{(}\StringTok{"country\_1"}\NormalTok{, }\StringTok{"country\_2"}\NormalTok{)]))}
 \NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
   
 \NormalTok{\}}
-
-
-\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_graphopt}\NormalTok{(graph\_EU)}
-\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_EU), }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout)}
 \end{Highlighting}
 \end{Shaded}
-
-\includegraphics{Report_files/figure-latex/unnamed-chunk-6-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{adj\_NA }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
 \NormalTok{)}
-\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country)}
-\NormalTok{z}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country)}
-\ControlFlowTok{while}\NormalTok{ (i}\SpecialCharTok{\textgreater{}=}\DecValTok{0}\NormalTok{) \{}
-  
-  
-\NormalTok{    country\_1 }\OtherTok{=}\NormalTok{ df\_NA\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
-    
-\NormalTok{    country\_2 }\OtherTok{=}\NormalTok{ df\_NA\_wines\_by\_country[z,}\DecValTok{1}\NormalTok{]}
-    
-\NormalTok{    adj }\OtherTok{=} 
-      \FunctionTok{ifelse}\NormalTok{(      }
-        \FunctionTok{ifelse}\NormalTok{(}
-\NormalTok{          df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{1000}\NormalTok{,}
-        \DecValTok{0}\NormalTok{, }
-        \FunctionTok{ifelse}\NormalTok{(}
-\NormalTok{          df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
-\NormalTok{      )}
-    
- 
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country)}
+\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country)}
 
-\NormalTok{adj\_NA }\OtherTok{\textless{}{-}}\NormalTok{ adj\_NA }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_row}\NormalTok{(country\_1,country\_2,adj)}
-\NormalTok{    z }\OtherTok{=}\NormalTok{ z}\DecValTok{{-}1}
-  \ControlFlowTok{if}\NormalTok{(z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)\{}
-\NormalTok{    i }\OtherTok{=}\NormalTok{ i}\DecValTok{{-}1}
-\NormalTok{    z }\OtherTok{=} \FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country)}
-\NormalTok{  \}}
-\NormalTok{\}}
-\NormalTok{graph\_NA }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(adj\_NA), }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
 
-\CommentTok{\# Get the adjacency matrix}
-\NormalTok{adj\_matrix\_NA }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_NA, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }
 
-\NormalTok{graph\_NA }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_NA, }\AttributeTok{mode =} \StringTok{"undirected"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
-\NormalTok{layout }\OtherTok{\textless{}{-}} \FunctionTok{layout\_with\_lgl}\NormalTok{(graph\_NA)}
-
-\CommentTok{\# Plot the graph}
-\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_NA), }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_NA)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"North America"}\NormalTok{, }\AttributeTok{layout=}\NormalTok{layout, }\AttributeTok{vertex.size =} \DecValTok{6}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{Report_files/figure-latex/unnamed-chunk-7-1.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
-\NormalTok{)}
-\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
-\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
-
-\NormalTok{adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{()  }\CommentTok{\# Initialize an empty tibble}
-
-\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }\CommentTok{\# Adjusted loop condition to avoid i = 0}
-
-\NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
-\NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
+\NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
+\NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_NA\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
 
 \NormalTok{  adj }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}
-    \FunctionTok{ifelse}\NormalTok{(df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{           df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{           df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{100}\NormalTok{,}
-    \DecValTok{0}\NormalTok{,}
-    \FunctionTok{ifelse}\NormalTok{(df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{           df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{           df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+    \FunctionTok{ifelse}\NormalTok{(df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{10}\NormalTok{,}
+    \ConstantTok{NA}\NormalTok{,}
+    \FunctionTok{ifelse}\NormalTok{(df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_NA\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_NA\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
 \NormalTok{  )}
 
-  \CommentTok{\# Create a tibble with the values and add it to adj\_AS}
+
 \NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{country\_1 =}\NormalTok{ country\_1, }\AttributeTok{country\_2 =}\NormalTok{ country\_2, }\AttributeTok{adj =}\NormalTok{ adj)}
-\NormalTok{  adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_AS, row\_data)}
+\NormalTok{  adj\_NA }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_NA, row\_data)}
 
 \NormalTok{  z }\OtherTok{\textless{}{-}}\NormalTok{ z }\SpecialCharTok{{-}} \DecValTok{1}
 
@@ -546,208 +944,31 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
 \NormalTok{    z }\OtherTok{\textless{}{-}}\NormalTok{ i}
 \NormalTok{  \}}
 \NormalTok{\}}
+\NormalTok{adj\_NA }\OtherTok{\textless{}{-}}\FunctionTok{na.omit}\NormalTok{(adj\_NA)}
+\NormalTok{graph\_NA }\OtherTok{\textless{}{-}} \FunctionTok{graph.empty}\NormalTok{()}
 
-\NormalTok{graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(adj\_AS), }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
-
-\CommentTok{\# Get the adjacency matrix}
-\NormalTok{adj\_matrix\_AS }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_AS, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
-\FunctionTok{print}\NormalTok{(adj\_matrix\_AS)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##         China Armenia     India    Cyprus   Lebanon   Georgia    Turkey
-## China       1     2.0  9.000000 11.000000 35.000000 86.000000 90.000000
-## Armenia     2     1.0  4.500000  5.500000 17.500000 43.000000 45.000000
-## India       9     4.5  1.000000  1.222222  3.888889  9.555556 10.000000
-## Cyprus     11     5.5  1.222222  1.000000  3.181818  7.818182  8.181818
-## Lebanon    35    17.5  3.888889  3.181818  1.000000  2.457143  2.571429
-## Georgia    86    43.0  9.555556  7.818182  2.457143  1.000000  1.046512
-## Turkey     90    45.0 10.000000  8.181818  2.571429  1.046512  1.000000
-## Israel      0     0.0 56.111111 45.909091 14.428571  5.872093  5.611111
-##            Israel
-## China    0.000000
-## Armenia  0.000000
-## India   56.111111
-## Cyprus  45.909091
-## Lebanon 14.428571
-## Georgia  5.872093
-## Turkey   5.611111
-## Israel   1.000000
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_AS, }\AttributeTok{mode =} \StringTok{"directed"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
-\NormalTok{layout }\OtherTok{\textless{}{-}} \FunctionTok{layout\_with\_kk}\NormalTok{(graph\_AS)}
-\FunctionTok{print}\NormalTok{(}\FunctionTok{get.edgelist}\NormalTok{(graph\_AS))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##       [,1]      [,2]     
-##  [1,] "China"   "Armenia"
-##  [2,] "China"   "India"  
-##  [3,] "China"   "Cyprus" 
-##  [4,] "China"   "Lebanon"
-##  [5,] "China"   "Georgia"
-##  [6,] "China"   "Turkey" 
-##  [7,] "Armenia" "China"  
-##  [8,] "Armenia" "India"  
-##  [9,] "Armenia" "Cyprus" 
-## [10,] "Armenia" "Lebanon"
-## [11,] "Armenia" "Georgia"
-## [12,] "Armenia" "Turkey" 
-## [13,] "India"   "China"  
-## [14,] "India"   "Armenia"
-## [15,] "India"   "Cyprus" 
-## [16,] "India"   "Lebanon"
-## [17,] "India"   "Georgia"
-## [18,] "India"   "Turkey" 
-## [19,] "India"   "Israel" 
-## [20,] "Cyprus"  "China"  
-## [21,] "Cyprus"  "Armenia"
-## [22,] "Cyprus"  "India"  
-## [23,] "Cyprus"  "Lebanon"
-## [24,] "Cyprus"  "Georgia"
-## [25,] "Cyprus"  "Turkey" 
-## [26,] "Cyprus"  "Israel" 
-## [27,] "Lebanon" "China"  
-## [28,] "Lebanon" "Armenia"
-## [29,] "Lebanon" "India"  
-## [30,] "Lebanon" "Cyprus" 
-## [31,] "Lebanon" "Georgia"
-## [32,] "Lebanon" "Turkey" 
-## [33,] "Lebanon" "Israel" 
-## [34,] "Georgia" "China"  
-## [35,] "Georgia" "Armenia"
-## [36,] "Georgia" "India"  
-## [37,] "Georgia" "Cyprus" 
-## [38,] "Georgia" "Lebanon"
-## [39,] "Georgia" "Turkey" 
-## [40,] "Georgia" "Israel" 
-## [41,] "Turkey"  "China"  
-## [42,] "Turkey"  "Armenia"
-## [43,] "Turkey"  "India"  
-## [44,] "Turkey"  "Cyprus" 
-## [45,] "Turkey"  "Lebanon"
-## [46,] "Turkey"  "Georgia"
-## [47,] "Turkey"  "Israel" 
-## [48,] "Israel"  "India"  
-## [49,] "Israel"  "Cyprus" 
-## [50,] "Israel"  "Lebanon"
-## [51,] "Israel"  "Georgia"
-## [52,] "Israel"  "Turkey"
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Plot the graph}
-\FunctionTok{plot}\NormalTok{(graph\_AS, }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_AS)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"Asia"}\NormalTok{, }\AttributeTok{layout=}\NormalTok{layout, }\AttributeTok{vertex.size =} \DecValTok{6}\NormalTok{, }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{Report_files/figure-latex/unnamed-chunk-8-1.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{adj\_AF }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
-\NormalTok{)}
-\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country)}
-\NormalTok{z}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country)}
-\ControlFlowTok{while}\NormalTok{ (i}\SpecialCharTok{\textgreater{}=}\DecValTok{0}\NormalTok{) \{}
-  
-  
-\NormalTok{    country\_1 }\OtherTok{=}\NormalTok{ df\_AF\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
-    
-\NormalTok{    country\_2 }\OtherTok{=}\NormalTok{ df\_AF\_wines\_by\_country[z,}\DecValTok{1}\NormalTok{]}
-    
-\NormalTok{    adj }\OtherTok{=} 
-      \FunctionTok{ifelse}\NormalTok{(      }
-        \FunctionTok{ifelse}\NormalTok{(}
-\NormalTok{          df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{100}\NormalTok{,}
-        \DecValTok{0}\NormalTok{, }
-        \FunctionTok{ifelse}\NormalTok{(}
-\NormalTok{          df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
-\NormalTok{      )}
-    
- 
-
-\NormalTok{adj\_AF }\OtherTok{\textless{}{-}}\NormalTok{ adj\_AF }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_row}\NormalTok{(country\_1,country\_2,adj)}
-\NormalTok{    z }\OtherTok{=}\NormalTok{ z}\DecValTok{{-}1}
-  \ControlFlowTok{if}\NormalTok{(z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)\{}
-\NormalTok{    i }\OtherTok{=}\NormalTok{ i}\DecValTok{{-}1}
-\NormalTok{    z }\OtherTok{=} \FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country)}
-\NormalTok{  \}}
+\NormalTok{vertex\_size\_NA }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =} \FunctionTok{character}\NormalTok{(),}\AttributeTok{Size =} \FunctionTok{numeric}\NormalTok{())}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country)}
+\ControlFlowTok{while}\NormalTok{(i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{  Country }\OtherTok{=}\NormalTok{ df\_NA\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  Size }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(df\_NA\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000} \SpecialCharTok{\textgreater{}} \DecValTok{2}\NormalTok{, (df\_NA\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000}\NormalTok{)}\SpecialCharTok{+}\DecValTok{7}\NormalTok{, }\DecValTok{7}\NormalTok{)}
+  \FunctionTok{add\_row}\NormalTok{(vertex\_size\_NA, }\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Size=}\FunctionTok{numeric}\NormalTok{())}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\NormalTok{Country,}\AttributeTok{Size=}\NormalTok{Size)}
+\NormalTok{  vertex\_size\_NA }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(vertex\_size\_NA,row\_data)}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{  vertex\_size\_NA }\OtherTok{\textless{}{-}}\NormalTok{ vertex\_size\_NA[}\FunctionTok{order}\NormalTok{(vertex\_size\_NA}\SpecialCharTok{$}\NormalTok{Size, }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{),]}
 \NormalTok{\}}
-\NormalTok{graph\_AF }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(adj\_AF), }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
 
-\CommentTok{\# Get the adjacency matrix}
-\NormalTok{adj\_matrix\_AF }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_AF, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
+\NormalTok{graph\_NA }\OtherTok{\textless{}{-}} \FunctionTok{add\_vertices}\NormalTok{(graph\_NA, }\AttributeTok{n =} \FunctionTok{nrow}\NormalTok{(df\_NA\_wines\_by\_country), }\AttributeTok{name =}\NormalTok{ df\_NA\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Country, }\AttributeTok{size =}\NormalTok{ vertex\_size\_NA}\SpecialCharTok{$}\NormalTok{Size)}
 
-\NormalTok{graph\_AF }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_AF, }\AttributeTok{mode =} \StringTok{"undirected"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
-\NormalTok{layout }\OtherTok{\textless{}{-}} \FunctionTok{layout\_with\_kk}\NormalTok{(graph\_AF)}
-
-\CommentTok{\# Plot the graph}
-\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_AF), }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_AF)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"Africa"}\NormalTok{, }\AttributeTok{layout=}\NormalTok{layout, }\AttributeTok{vertex.size =} \DecValTok{6}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{Report_files/figure-latex/unnamed-chunk-9-1.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{adj\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
-\NormalTok{)}
-\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country)}
-\NormalTok{z}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country)}
-\ControlFlowTok{while}\NormalTok{ (i}\SpecialCharTok{\textgreater{}=}\DecValTok{0}\NormalTok{) \{}
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(adj\_NA)}
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{  graph\_NA }\OtherTok{\textless{}{-}} \FunctionTok{add\_edges}\NormalTok{(graph\_NA, }\AttributeTok{edges =} \FunctionTok{as.matrix}\NormalTok{(adj\_NA[i, }\FunctionTok{c}\NormalTok{(}\StringTok{"country\_1"}\NormalTok{, }\StringTok{"country\_2"}\NormalTok{)]))}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
   
-  
-\NormalTok{    country\_1 }\OtherTok{=}\NormalTok{ df\_OZ\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
-    
-\NormalTok{    country\_2 }\OtherTok{=}\NormalTok{ df\_OZ\_wines\_by\_country[z,}\DecValTok{1}\NormalTok{]}
-    
-\NormalTok{    adj }\OtherTok{=} 
-      \FunctionTok{ifelse}\NormalTok{(      }
-        \FunctionTok{ifelse}\NormalTok{(}
-\NormalTok{          df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{1000}\NormalTok{,}
-        \DecValTok{0}\NormalTok{, }
-        \FunctionTok{ifelse}\NormalTok{(}
-\NormalTok{          df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
-\NormalTok{                 df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
-\NormalTok{      )}
-    
- 
-
-\NormalTok{adj\_OZ }\OtherTok{\textless{}{-}}\NormalTok{ adj\_OZ }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{add\_row}\NormalTok{(country\_1,country\_2,adj)}
-\NormalTok{    z }\OtherTok{=}\NormalTok{ z}\DecValTok{{-}1}
-  \ControlFlowTok{if}\NormalTok{(z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)\{}
-\NormalTok{    i }\OtherTok{=}\NormalTok{ i}\DecValTok{{-}1}
-\NormalTok{    z }\OtherTok{=} \FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country)}
-\NormalTok{  \}}
 \NormalTok{\}}
-\NormalTok{graph\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_data\_frame}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(adj\_OZ), }\AttributeTok{directed =} \ConstantTok{FALSE}\NormalTok{)}
-
-\CommentTok{\# Get the adjacency matrix}
-\NormalTok{adj\_matrix\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{get.adjacency}\NormalTok{(graph\_OZ, }\AttributeTok{attr =} \StringTok{"adj"}\NormalTok{, }\AttributeTok{sparse =} \ConstantTok{FALSE}\NormalTok{))}
-
-\NormalTok{graph\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{graph\_from\_adjacency\_matrix}\NormalTok{(adj\_matrix\_OZ, }\AttributeTok{mode =} \StringTok{"undirected"}\NormalTok{, }\AttributeTok{weighted =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
-\NormalTok{layout }\OtherTok{\textless{}{-}} \FunctionTok{layout\_with\_lgl}\NormalTok{(graph\_OZ)}
-
-\CommentTok{\# Plot the graph}
-\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_OZ), }\AttributeTok{edge.label =} \FunctionTok{E}\NormalTok{(graph\_OZ)}\SpecialCharTok{$}\NormalTok{adj, }\AttributeTok{main =} \StringTok{"Ociania"}\NormalTok{, }\AttributeTok{layout=}\NormalTok{layout, }\AttributeTok{vertex.size =} \DecValTok{6}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
-
-\includegraphics{Report_files/figure-latex/unnamed-chunk-10-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -756,9 +977,8 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
 \NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
 \NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
 
-\NormalTok{adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{()  }\CommentTok{\# Initialize an empty tibble}
 
-\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }\CommentTok{\# Adjusted loop condition to avoid i = 0}
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }
 
 \NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
 \NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
@@ -773,7 +993,7 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
 \NormalTok{           df\_AS\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AS\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
 \NormalTok{  )}
 
-  \CommentTok{\# Create a tibble with the values and add it to adj\_AS}
+  
 \NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{country\_1 =}\NormalTok{ country\_1, }\AttributeTok{country\_2 =}\NormalTok{ country\_2, }\AttributeTok{adj =}\NormalTok{ adj)}
 \NormalTok{  adj\_AS }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_AS, row\_data)}
 
@@ -787,50 +1007,347 @@ Data}\label{social-network-analysis-report-on-wine-review-data}
 \NormalTok{adj\_AS }\OtherTok{\textless{}{-}}\FunctionTok{na.omit}\NormalTok{(adj\_AS)}
 \NormalTok{graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{graph.empty}\NormalTok{()}
 
-\NormalTok{graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{add\_vertices}\NormalTok{(graph\_AS, }\AttributeTok{n =} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country), }\AttributeTok{name =}\NormalTok{ df\_AS\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Country)}
-\NormalTok{vertex\_names }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(}\FunctionTok{V}\NormalTok{(graph\_AS))}
-\FunctionTok{print}\NormalTok{(vertex\_names)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## [1] "Israel"  "Turkey"  "Georgia" "Lebanon" "Cyprus"  "India"   "Armenia"
-## [8] "China"
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{colors\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Color=}\FunctionTok{character}\NormalTok{())}
+\NormalTok{vertex\_size\_AS }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =} \FunctionTok{character}\NormalTok{(),}\AttributeTok{Size =} \FunctionTok{numeric}\NormalTok{())}
 \NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country)}
-
-\ControlFlowTok{while}\NormalTok{(i}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{)\{}
-\NormalTok{  generate\_random\_color }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{() \{}
-\NormalTok{  red }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
-\NormalTok{  green }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
-\NormalTok{  blue }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\DecValTok{1}\NormalTok{)}
-  \FunctionTok{return}\NormalTok{(}\FunctionTok{rgb}\NormalTok{(red, green, blue))}
-\NormalTok{  \}}
-  
-\NormalTok{  Country }\OtherTok{\textless{}{-}}\NormalTok{ df\_AS\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
-\NormalTok{  Color}\OtherTok{\textless{}{-}}\FunctionTok{generate\_random\_color}\NormalTok{()}
-  \FunctionTok{add\_row}\NormalTok{(colors\_AS,}\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{Color=}\FunctionTok{character}\NormalTok{())}
-\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i}\DecValTok{{-}1}
-\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =}\NormalTok{ Country, }\AttributeTok{Color =}\NormalTok{ Color)}
-\NormalTok{  colors\_AS }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(colors\_AS, row\_data)}
+\ControlFlowTok{while}\NormalTok{(i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{  Country }\OtherTok{=}\NormalTok{ df\_AS\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  Size }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(df\_AS\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{100} \SpecialCharTok{\textgreater{}} \DecValTok{5}\NormalTok{, (df\_AS\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{100}\NormalTok{)}\SpecialCharTok{+}\DecValTok{7}\NormalTok{, }\DecValTok{7}\NormalTok{)}
+  \FunctionTok{add\_row}\NormalTok{(vertex\_size\_AS, }\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Size=}\FunctionTok{numeric}\NormalTok{())}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\NormalTok{Country,}\AttributeTok{Size=}\NormalTok{Size)}
+\NormalTok{  vertex\_size\_AS }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(vertex\_size\_AS,row\_data)}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{  vertex\_size\_AS }\OtherTok{\textless{}{-}}\NormalTok{ vertex\_size\_AS[}\FunctionTok{order}\NormalTok{(vertex\_size\_AS}\SpecialCharTok{$}\NormalTok{Size, }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{),]}
 \NormalTok{\}}
+
+\NormalTok{graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{add\_vertices}\NormalTok{(graph\_AS, }\AttributeTok{n =} \FunctionTok{nrow}\NormalTok{(df\_AS\_wines\_by\_country), }\AttributeTok{name =}\NormalTok{ df\_AS\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Country, }\AttributeTok{size =}\NormalTok{ vertex\_size\_AS}\SpecialCharTok{$}\NormalTok{Size)}
 
 \NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(adj\_AS)}
 \ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
 \NormalTok{  graph\_AS }\OtherTok{\textless{}{-}} \FunctionTok{add\_edges}\NormalTok{(graph\_AS, }\AttributeTok{edges =} \FunctionTok{as.matrix}\NormalTok{(adj\_AS[i, }\FunctionTok{c}\NormalTok{(}\StringTok{"country\_1"}\NormalTok{, }\StringTok{"country\_2"}\NormalTok{)]))}
 \NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
-  
 \NormalTok{\}}
-
-\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_sugiyama}\NormalTok{(graph\_AS)}
-\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_AS), }\AttributeTok{edge.arrow.size =} \FloatTok{0.3}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout)}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{Report_files/figure-latex/unnamed-chunk-11-1.pdf}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adj\_AF }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
+\NormalTok{)}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country)}
+\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country)}
+
+\NormalTok{adj\_AF }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{()  }
+
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }
+
+\NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
+\NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_AF\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
+
+\NormalTok{  adj }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}
+    \FunctionTok{ifelse}\NormalTok{(df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{10}\NormalTok{,}
+    \ConstantTok{NA}\NormalTok{,}
+    \FunctionTok{ifelse}\NormalTok{(df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_AF\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_AF\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{  )}
+
+  
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{country\_1 =}\NormalTok{ country\_1, }\AttributeTok{country\_2 =}\NormalTok{ country\_2, }\AttributeTok{adj =}\NormalTok{ adj)}
+\NormalTok{  adj\_AF }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_AF, row\_data)}
+
+\NormalTok{  z }\OtherTok{\textless{}{-}}\NormalTok{ z }\SpecialCharTok{{-}} \DecValTok{1}
+
+  \ControlFlowTok{if}\NormalTok{ (z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{    z }\OtherTok{\textless{}{-}}\NormalTok{ i}
+\NormalTok{  \}}
+\NormalTok{\}}
+\NormalTok{adj\_AF }\OtherTok{\textless{}{-}}\FunctionTok{na.omit}\NormalTok{(adj\_AF)}
+\NormalTok{graph\_AF }\OtherTok{\textless{}{-}} \FunctionTok{graph.empty}\NormalTok{()}
+
+\NormalTok{vertex\_size\_AF }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =} \FunctionTok{character}\NormalTok{(),}\AttributeTok{Size =} \FunctionTok{numeric}\NormalTok{())}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country)}
+\ControlFlowTok{while}\NormalTok{(i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{  Country }\OtherTok{=}\NormalTok{ df\_AF\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  Size }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(df\_AF\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000} \SpecialCharTok{\textgreater{}} \DecValTok{2}\NormalTok{, (df\_AF\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000}\NormalTok{)}\SpecialCharTok{+}\DecValTok{7}\NormalTok{, }\DecValTok{7}\NormalTok{)}
+  \FunctionTok{add\_row}\NormalTok{(vertex\_size\_AF, }\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Size=}\FunctionTok{numeric}\NormalTok{())}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\NormalTok{Country,}\AttributeTok{Size=}\NormalTok{Size)}
+\NormalTok{  vertex\_size\_AF }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(vertex\_size\_AF,row\_data)}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{  vertex\_size\_AF }\OtherTok{\textless{}{-}}\NormalTok{ vertex\_size\_AF[}\FunctionTok{order}\NormalTok{(vertex\_size\_AF}\SpecialCharTok{$}\NormalTok{Size, }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{),]}
+\NormalTok{\}}
+
+\NormalTok{graph\_AF }\OtherTok{\textless{}{-}} \FunctionTok{add\_vertices}\NormalTok{(graph\_AF, }\AttributeTok{n =} \FunctionTok{nrow}\NormalTok{(df\_AF\_wines\_by\_country), }\AttributeTok{name =}\NormalTok{ df\_AF\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Country, }\AttributeTok{size =}\NormalTok{ vertex\_size\_AF}\SpecialCharTok{$}\NormalTok{Size)}
+
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(adj\_AF)}
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{  graph\_AF }\OtherTok{\textless{}{-}} \FunctionTok{add\_edges}\NormalTok{(graph\_AF, }\AttributeTok{edges =} \FunctionTok{as.matrix}\NormalTok{(adj\_AF[i, }\FunctionTok{c}\NormalTok{(}\StringTok{"country\_1"}\NormalTok{, }\StringTok{"country\_2"}\NormalTok{)]))}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+  
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adj\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{( }\AttributeTok{country\_1=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{country\_2=}\FunctionTok{character}\NormalTok{(),}\AttributeTok{adj=}\FunctionTok{numeric}\NormalTok{()}
+\NormalTok{)}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country)}
+\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country)}
+
+\NormalTok{adj\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{()  }
+
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}=} \DecValTok{1}\NormalTok{) \{  }
+
+\NormalTok{  country\_1 }\OtherTok{\textless{}{-}}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{1}\NormalTok{]}
+\NormalTok{  country\_2 }\OtherTok{\textless{}{-}}\NormalTok{ df\_OZ\_wines\_by\_country[z, }\DecValTok{1}\NormalTok{]}
+
+\NormalTok{  adj }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}
+    \FunctionTok{ifelse}\NormalTok{(df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \DecValTok{10}\NormalTok{,}
+    \ConstantTok{NA}\NormalTok{,}
+    \FunctionTok{ifelse}\NormalTok{(df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{\textgreater{}}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{],}
+\NormalTok{           df\_OZ\_wines\_by\_country[i, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ df\_OZ\_wines\_by\_country[z, }\DecValTok{2}\NormalTok{])}
+\NormalTok{  )}
+
+  
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{country\_1 =}\NormalTok{ country\_1, }\AttributeTok{country\_2 =}\NormalTok{ country\_2, }\AttributeTok{adj =}\NormalTok{ adj)}
+\NormalTok{  adj\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(adj\_OZ, row\_data)}
+
+\NormalTok{  z }\OtherTok{\textless{}{-}}\NormalTok{ z }\SpecialCharTok{{-}} \DecValTok{1}
+
+  \ControlFlowTok{if}\NormalTok{ (z }\SpecialCharTok{==} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{    z }\OtherTok{\textless{}{-}}\NormalTok{ i}
+\NormalTok{  \}}
+\NormalTok{\}}
+\NormalTok{adj\_OZ }\OtherTok{\textless{}{-}}\FunctionTok{na.omit}\NormalTok{(adj\_OZ)}
+\NormalTok{graph\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{graph.empty}\NormalTok{()}
+
+\NormalTok{vertex\_size\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country =} \FunctionTok{character}\NormalTok{(),}\AttributeTok{Size =} \FunctionTok{numeric}\NormalTok{())}
+\NormalTok{i }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country)}
+\ControlFlowTok{while}\NormalTok{(i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)\{}
+\NormalTok{  Country }\OtherTok{=}\NormalTok{ df\_OZ\_wines\_by\_country[i,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  Size }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(df\_OZ\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000} \SpecialCharTok{\textgreater{}} \DecValTok{2}\NormalTok{, (df\_OZ\_wines\_by\_country[i,}\DecValTok{2}\NormalTok{]}\SpecialCharTok{/}\DecValTok{1000}\NormalTok{)}\SpecialCharTok{+}\DecValTok{7}\NormalTok{, }\DecValTok{7}\NormalTok{)}
+  \FunctionTok{add\_row}\NormalTok{(vertex\_size\_OZ, }\AttributeTok{Country=}\FunctionTok{character}\NormalTok{(), }\AttributeTok{Size=}\FunctionTok{numeric}\NormalTok{())}
+\NormalTok{  row\_data }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}\AttributeTok{Country=}\NormalTok{Country,}\AttributeTok{Size=}\NormalTok{Size)}
+\NormalTok{  vertex\_size\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(vertex\_size\_OZ,row\_data)}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{  vertex\_size\_OZ }\OtherTok{\textless{}{-}}\NormalTok{ vertex\_size\_OZ[}\FunctionTok{order}\NormalTok{(vertex\_size\_OZ}\SpecialCharTok{$}\NormalTok{Size, }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{),]}
+\NormalTok{\}}
+
+\NormalTok{graph\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{add\_vertices}\NormalTok{(graph\_OZ, }\AttributeTok{n =} \FunctionTok{nrow}\NormalTok{(df\_OZ\_wines\_by\_country), }\AttributeTok{name =}\NormalTok{ df\_OZ\_wines\_by\_country}\SpecialCharTok{$}\NormalTok{Country, }\AttributeTok{size =}\NormalTok{ vertex\_size\_OZ}\SpecialCharTok{$}\NormalTok{Size)}
+
+\NormalTok{i}\OtherTok{\textless{}{-}}\FunctionTok{nrow}\NormalTok{(adj\_OZ)}
+\ControlFlowTok{while}\NormalTok{ (i }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{  graph\_OZ }\OtherTok{\textless{}{-}} \FunctionTok{add\_edges}\NormalTok{(graph\_OZ, }\AttributeTok{edges =} \FunctionTok{as.matrix}\NormalTok{(adj\_OZ[i, }\FunctionTok{c}\NormalTok{(}\StringTok{"country\_1"}\NormalTok{, }\StringTok{"country\_2"}\NormalTok{)]))}
+\NormalTok{  i }\OtherTok{\textless{}{-}}\NormalTok{ i }\SpecialCharTok{{-}} \DecValTok{1}
+  
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Bei den folgenden Netwerken ist auf folgendes zu achten:
+
+\begin{itemize}
+\item
+  Die Nodes sind die Herkunftsländer der Weine
+\item
+  Eine Verbindung zwischen 2 nodes bedeutet das sie eine gewisse
+  Ähnlichkeit in der Anzahl der Weine im Datensatz aufweisen
+\item
+  die Länge dieser Verbindung stellt den Grad der Ähnlichkeit da, so
+  kürzer die Verbindung zweier nodes ist desto ähnlicher ist die Anzahl
+  der Weine im Datensatz
+\item
+  Die Richtung der Verbindung gibt an welches der Beiden Länder mehr
+  Weine besitzt
+\item
+  die Größe der Nodes skaliert mit ihrer Gesamtanzahl an Weinen
+\item
+  Eine verbindung zwischen zwei Ländern wird nur dann angezeigt wenn das
+  eine Land maximal 10 mal so viel Weine wie das andere zum Datensatz
+  beisteuert
+\end{itemize}
+
+\paragraph{Europa}\label{europa}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_graphopt}\NormalTok{(graph\_EU)}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_EU), }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout, }\AttributeTok{main =} \StringTok{"Europa"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+In Europa ist zu beobachten das Besonders die beiden Hauptproduzenten
+Italien und Frankreich eine enge Bindung haben, weiterhin kann man sehen
+das Griechenland als Bindeglied der beiden aufzufindenden Cluster
+agiert. Der eine Cluster, hier oben zu sehen, besteht aus vor allem
+Osteuropäischen Ländern sowie den Balkanstaaten. Der andere Cluster,
+hier unten zu sehen, besteht vor allem aus Süd und Westeuropäischen
+Ländern. Als größter Produzent ist hier Frankreich zu identifizieren.
+
+\paragraph{Asien}\label{asien}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_graphopt}\NormalTok{(graph\_AS)}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_AS), }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout, }\AttributeTok{main =} \StringTok{"Asien"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+In Asien gibt es keine wirklche Clusterbildung, man kann zwar erkennen
+das Israel der Hauptproduzent dieser Region ist, jedoch nicht mit
+astronomischem Abstand, die Türkei ist in diesem Netzwerk außerdem
+wichtig da sie viele Beziehungen mit anderen Nodes hat.
+
+\paragraph{Africa}\label{africa}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_graphopt}\NormalTok{(graph\_AF)}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_AF), }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout, }\AttributeTok{main =} \StringTok{"Afrika"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-18-1.pdf}
+
+In Afrika ensteht die Situation das keines der 3 Länder eine Beziehung
+hat, daraus kann man schließen das es keine Konstelationen von Ländern
+gibt wo das eine Land maximal 10 mal so viele weine Beiträgt wie das
+andere. Somit haben wir hier ein Netzwerk ohne Beziehungen.
+
+\paragraph{Süd Amerika}\label{suxfcd-amerika}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_graphopt}\NormalTok{(graph\_SA)}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_SA), }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout, }\AttributeTok{main =} \StringTok{"Süd Amerika"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-19-1.pdf}
+
+In Südamerika kommt es zu einer interessanten Clusterbildung, die beiden
+Länder Chile und Argentinien haben eine Verbindung, die beiden Länder
+sind auch auf dem Weltmarkt durchaus wichtige Produzenten. Ein weiterer
+Cluster bilden die Länder: Peru, Uruguay und Brazilien, kleinere
+Lateinamerikanische Länder welche nicht besonders relevant sind auf dem
+Weltmarkt, jedoch lässt sich aus dem Netzwerk ablesen das sie ein
+Dreieck bilden, dass bedeutet das sie ungefähr alle gleich viele Weine
+zum Datensatz beitragen.
+
+\paragraph{Nord Amerika}\label{nord-amerika}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_graphopt}\NormalTok{(graph\_NA)}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_NA), }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout, }\AttributeTok{main =} \StringTok{"Nord Amerika"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-20-1.pdf}
+
+In Nord Amerika zeichnet sich ein zu erwartendes Bild ab, die USA
+stellen mit großem Abstand die meisten Weine, eine weitere Beziehung
+besteht zwar zwischen Mexico und Kanada, diese ist jedoch nicht von
+besonderer Bedeutung.
+
+\paragraph{Ozianien}\label{ozianien}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{layout }\OtherTok{=} \FunctionTok{layout\_with\_graphopt}\NormalTok{(graph\_OZ)}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{simplify}\NormalTok{(graph\_OZ), }\AttributeTok{edge.arrow.size =} \FloatTok{0.2}\NormalTok{,}\AttributeTok{layout =}\NormalTok{ layout, }\AttributeTok{main =} \StringTok{"Ozianien"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-21-1.pdf}
+
+Abschließend sehen wir in Ozianien, nur die Bindung zwischen Australien
+und Neuseeland. Diese beiden Länder sind die einzigen die im Datensatz
+vom Kontinent Ozianien vertreten sind. Überaschenderweise ist Australien
+verhältnismäßig klein da es nicht besonder viele Weine dem Datensatz
+stellt. Auf dem Weltmarkt jedoch ist Australien eine wichtige
+Exportnation.
+
+\subsection{Conclusio}\label{conclusio}
+
+Abschließend lassen sich folgende Erfgebnisse festhalten:
+
+\begin{itemize}
+\item
+  Die USA sind das Land welches die meisten weine im Datensatz stellen:
+  54504 (41.9\%)
+\item
+  England hat mit 91,581 Punkten den höchsten Punktedurchschnitt im
+  Datensatz wobei die USA mit 0.0133 den geringsten Standartfehler
+  aufweisen
+\item
+  Das beste Punkte zu Preis Verhältnis hat die Ukraine mit 9,124, am
+  schlechtesten schneidet die Schweiz mit 1,039 ab
+\item
+  Nach analyse der vertretenden Nationen sowie der Weltweiten Produktion
+  von Wein lässt sich feststellen das der Datensatz einen starken
+  USA-Bias hat und vor allem Weine aus den USA enthält
+\item
+  Australische Weine unterproprtional viel Bewertet und Portugisische
+  überproportional viel.
+\item
+  In Europa sind zwei Cluster zu erkennen im Bezug auf die ähnlichkeit
+  der Anzahl der Weine
+
+  \begin{itemize}
+  \item
+    Cluster 1 besteht vor allem aus kleineren West \& mitteleuropäischen
+    Staaten sowei dem Balkan und Osteuropa
+  \item
+    Cluster 2 besteht aus den Großen Süd, West und Mitteleuropäischen
+    Ländern
+  \item
+    Griechenland liegt als Bindeglied zwischen den beiden
+  \end{itemize}
+\item
+  In Asien sind keine Cluster zu erkennen nur Israel und die Türkei
+  spielen eine wichtige Rolle da sie verhältnismäßig viel Produzieren
+\item
+  In Afrika existiert keine Verbindung zwischen den Ländern da sie alle
+  zu sehr unterschiedliche mengen an Wein zum Datensatz beitragen
+\item
+  in Süd Amerika existieren 2 Cluster:
+
+  \begin{itemize}
+  \item
+    Cluster 1 bestehend aus Argentienen und Chile, zwei auch weltweit
+    bedeutende Weinexportnationen
+  \item
+    Cluster 2 besteht aus Uruguay, Brazilien und Peru welche jeweils
+    ähnlich viel beitragen aber aus weltweiter Perspektive eher
+    unerheblich sind
+  \end{itemize}
+\item
+  In Nordamerika ist nur die Dominanz der USA im Datensatz abzusehen
+  sowie eine nicht besonders wichtige verbindung zwischen mexico und
+  Kanada
+\item
+  In Ozianien kann man nur die Verbindung zwischen Australien und
+  Neuseeland sehen da diese Länder die einzigen beiden aus der Region
+  sind die im Datensatz vertreten sind
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Australien sollte aufgrund seiner wichtigen Rolle auf dem Weltmarkt
+    eigentlich eine größere Menge an weinen Stellen
+  \end{itemize}
+\end{itemize}
 
 \end{document}

@@ -1,10 +1,4 @@
----
-title: "Social Network Analysis Report on Wine Review Data"
-output: 
-  pdf_document: default
----
-
-# Social Network Analysis Report on Wine Review Data
+# Social Network Analysis Report über Weinbewertungs-Daten
 
 ## Einleitung und Forschungsfrage
 
@@ -66,12 +60,12 @@ library(igraph)
 library(ggplot2)
 library(gridExtra)
 # laden des Datensatzes
-winemag_data_130k_v2 <- read_csv("/Users/john-thomas/Desktop/UNI/SNA/SocialNetworkAnalysis/src/Main/Data/archive/winemag-data-130k-v2.csv",show_col_types = FALSE)
+winemag_data_130k_v2 <- read_csv("winemag-data-130k-v2.csv",show_col_types = FALSE)
 # zuweisen des Datensatzes zu einem neue Data Frame zur weiterverarbeitung
 df <- winemag_data_130k_v2
 
 # zweiten Datensatz laden und umwandeln um ihn in der anschließenden Analyse Nutzen zu können
-wineproduction_data_2023 <- read.csv("/Users/john-thomas/Desktop/UNI/SNA/wine-producing-countries-2023.csv")
+wineproduction_data_2023 <- read.csv("wine-producing-countries-2023.csv")
 df_wine_prod <- na.omit(select(wineproduction_data_2023, country, wineProducingCountries_wineProduction))
 ```
 
@@ -249,7 +243,7 @@ grid.arrange(pie_WW_prod, pie_WW_set, ncol = 2)
 
 Hier können wir nun beobachten das das Verhältnis der bewerteten Weine sich deutlich von dem der tatsächlichen weltweite Produktion unterscheidet. Diese Disparität kann vielerlei Gründe haben, zum einen ist das Magazin von welchem die Daten erhoben wurden Amerekanisch weshalb ein gewisser Bias in die Richtung zu erwarten war. Die anderen Unterschiede jedoch sind schwerer zu erklären wie zum Beispiel das Australien der weltweit fünft größte Weinproduzent ist jedoch bei den bewerteten Weinen nicht unter den Top 5 auftritt. Desweiteren werden anscheinend überproportional mehr Portugisische Weine bewertet als Portugal insgesammt anteilig produziert.
 
-### Frage 5 - In welcher Relationen stehen die Länder in Bezug auf die Anzahl der bewerteten Weine zueinander? 
+### Frage 5 - In welcher Relationen stehen die Länder in Bezug auf die Anzahl der bewerteten Weine zueinander?
 
 Um herrauszufinden in welcher Relation die verschiedenen Länder zueinander stehen, im Bezug auf den Anteil ihrer Weine im Datensatz müssen wir die Daten zuerst nach Kontinent sortieren um sie dann weiter zu verarbeiten. Dadurch das wir so viele verschiedene Länder und verbindungen haben ist es sinvoller Subnetze für die verschiednen Kontinente zu erstellen da so eine bessere übersicht herscht.
 
@@ -372,16 +366,17 @@ Der nächste Schritt ist nun die Graphen für die jeweiligen Kontinente zu erste
 # adjancy matrix erstellen
 adj_SA <- tibble( country_1=character(),country_2=character(),adj=numeric()
 )
+# zähler für die folgende While schleife aufsetzen
 i <- nrow(df_SA_wines_by_country)
 z <- nrow(df_SA_wines_by_country)
 
-#adj_SA <- tibble()  
-
+#zuweisen der Länder zueinander damit jede beziehung zwischen jedem Land berechnet werden kann 
 while (i >= 1) {  
 
   country_1 <- df_SA_wines_by_country[i, 1]
   country_2 <- df_SA_wines_by_country[z, 1]
 
+  # adjacency berechnen, wie ähnlch die Anzahl der weine ist
   adj <- ifelse(
     ifelse(df_SA_wines_by_country[z, 2] > df_SA_wines_by_country[i, 2],
            df_SA_wines_by_country[z, 2] / df_SA_wines_by_country[i, 2],
@@ -392,10 +387,11 @@ while (i >= 1) {
            df_SA_wines_by_country[i, 2] / df_SA_wines_by_country[z, 2])
   )
 
-  # Create a tibble with the values and add it to adj_AS
+  # Reihe formatieren und in die Matrix einfügen
   row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
   adj_SA <- bind_rows(adj_SA, row_data)
 
+  # Counter setzen
   z <- z - 1
 
   if (z == 0) {
@@ -403,9 +399,11 @@ while (i >= 1) {
     z <- i
   }
 }
+# NA Werte entfernen und den leeren Graphen erstellen
 adj_SA <-na.omit(adj_SA)
 graph_SA <- graph.empty()
 
+# größe der Nodes berechnen (nach totaler Anzahl der Weine)
 vertex_size_SA <- tibble(Country = character(),Size = numeric())
 i <- nrow(df_SA_wines_by_country)
 while(i > 0){
@@ -418,8 +416,10 @@ while(i > 0){
   vertex_size_SA <- vertex_size_SA[order(vertex_size_SA$Size, decreasing = TRUE),]
 }
 
+# Nodes hinzufügen
 graph_SA <- add_vertices(graph_SA, n = nrow(df_SA_wines_by_country), name = df_SA_wines_by_country$Country, size = vertex_size_SA$Size)
 
+# Edges hinzufügen
 i<-nrow(adj_SA)
 while (i > 0) {
   graph_SA <- add_edges(graph_SA, edges = as.matrix(adj_SA[i, c("country_1", "country_2")]))
@@ -434,9 +434,8 @@ adj_EU <- tibble( country_1=character(),country_2=character(),adj=numeric()
 i <- nrow(df_EU_wines_by_country)
 z <- nrow(df_EU_wines_by_country)
 
-adj_EU <- tibble()  # Initialize an empty tibble
 
-while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+while (i >= 1) {  
 
   country_1 <- df_EU_wines_by_country[i, 1]
   country_2 <- df_EU_wines_by_country[z, 1]
@@ -451,7 +450,7 @@ while (i >= 1) {  # Adjusted loop condition to avoid i = 0
            df_EU_wines_by_country[i, 2] / df_EU_wines_by_country[z, 2])
   )
 
-  # Create a tibble with the values and add it to adj_AS
+  
   row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
   adj_EU <- bind_rows(adj_EU, row_data)
 
@@ -493,9 +492,8 @@ adj_NA <- tibble( country_1=character(),country_2=character(),adj=numeric()
 i <- nrow(df_NA_wines_by_country)
 z <- nrow(df_NA_wines_by_country)
 
-adj_NA <- tibble()  # Initialize an empty tibble
 
-while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+while (i >= 1) {  
 
   country_1 <- df_NA_wines_by_country[i, 1]
   country_2 <- df_NA_wines_by_country[z, 1]
@@ -510,7 +508,7 @@ while (i >= 1) {  # Adjusted loop condition to avoid i = 0
            df_NA_wines_by_country[i, 2] / df_NA_wines_by_country[z, 2])
   )
 
-  # Create a tibble with the values and add it to adj_AS
+
   row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
   adj_NA <- bind_rows(adj_NA, row_data)
 
@@ -552,9 +550,8 @@ adj_AS <- tibble( country_1=character(),country_2=character(),adj=numeric()
 i <- nrow(df_AS_wines_by_country)
 z <- nrow(df_AS_wines_by_country)
 
-adj_AS <- tibble()  # Initialize an empty tibble
 
-while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+while (i >= 1) {  
 
   country_1 <- df_AS_wines_by_country[i, 1]
   country_2 <- df_AS_wines_by_country[z, 1]
@@ -569,7 +566,7 @@ while (i >= 1) {  # Adjusted loop condition to avoid i = 0
            df_AS_wines_by_country[i, 2] / df_AS_wines_by_country[z, 2])
   )
 
-  # Create a tibble with the values and add it to adj_AS
+  
   row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
   adj_AS <- bind_rows(adj_AS, row_data)
 
@@ -610,9 +607,9 @@ adj_AF <- tibble( country_1=character(),country_2=character(),adj=numeric()
 i <- nrow(df_AF_wines_by_country)
 z <- nrow(df_AF_wines_by_country)
 
-adj_AF <- tibble()  # Initialize an empty tibble
+adj_AF <- tibble()  
 
-while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+while (i >= 1) {  
 
   country_1 <- df_AF_wines_by_country[i, 1]
   country_2 <- df_AF_wines_by_country[z, 1]
@@ -620,14 +617,14 @@ while (i >= 1) {  # Adjusted loop condition to avoid i = 0
   adj <- ifelse(
     ifelse(df_AF_wines_by_country[z, 2] > df_AF_wines_by_country[i, 2],
            df_AF_wines_by_country[z, 2] / df_AF_wines_by_country[i, 2],
-           df_AF_wines_by_country[i, 2] / df_AF_wines_by_country[z, 2]) > 10000,
+           df_AF_wines_by_country[i, 2] / df_AF_wines_by_country[z, 2]) > 10,
     NA,
     ifelse(df_AF_wines_by_country[z, 2] > df_AF_wines_by_country[i, 2],
            df_AF_wines_by_country[z, 2] / df_AF_wines_by_country[i, 2],
            df_AF_wines_by_country[i, 2] / df_AF_wines_by_country[z, 2])
   )
 
-  # Create a tibble with the values and add it to adj_AS
+  
   row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
   adj_AF <- bind_rows(adj_AF, row_data)
 
@@ -669,9 +666,9 @@ adj_OZ <- tibble( country_1=character(),country_2=character(),adj=numeric()
 i <- nrow(df_OZ_wines_by_country)
 z <- nrow(df_OZ_wines_by_country)
 
-adj_OZ <- tibble()  # Initialize an empty tibble
+adj_OZ <- tibble()  
 
-while (i >= 1) {  # Adjusted loop condition to avoid i = 0
+while (i >= 1) {  
 
   country_1 <- df_OZ_wines_by_country[i, 1]
   country_2 <- df_OZ_wines_by_country[z, 1]
@@ -686,7 +683,7 @@ while (i >= 1) {  # Adjusted loop condition to avoid i = 0
            df_OZ_wines_by_country[i, 2] / df_OZ_wines_by_country[z, 2])
   )
 
-  # Create a tibble with the values and add it to adj_AS
+  
   row_data <- tibble(country_1 = country_1, country_2 = country_2, adj = adj)
   adj_OZ <- bind_rows(adj_OZ, row_data)
 
@@ -722,22 +719,108 @@ while (i > 0) {
 }
 ```
 
+Bei den folgenden Netwerken ist auf folgendes zu achten:
+
+-   Die Nodes sind die Herkunftsländer der Weine
+
+-   Eine Verbindung zwischen 2 nodes bedeutet das sie eine gewisse Ähnlichkeit in der Anzahl der Weine im Datensatz aufweisen
+
+-   die Länge dieser Verbindung stellt den Grad der Ähnlichkeit da, so kürzer die Verbindung zweier nodes ist desto ähnlicher ist die Anzahl der Weine im Datensatz
+
+-   Die Richtung der Verbindung gibt an welches der Beiden Länder mehr Weine besitzt
+
+-   die Größe der Nodes skaliert mit ihrer Gesamtanzahl an Weinen
+
+-   Eine verbindung zwischen zwei Ländern wird nur dann angezeigt wenn das eine Land maximal 10 mal so viel Weine wie das andere zum Datensatz beisteuert
+
+#### Europa
+
+```{r}
+layout = layout_with_graphopt(graph_EU)
+plot(simplify(graph_EU), edge.arrow.size = 0.2,layout = layout, main = "Europa")
+```
+
+In Europa ist zu beobachten das Besonders die beiden Hauptproduzenten Italien und Frankreich eine enge Bindung haben, weiterhin kann man sehen das Griechenland als Bindeglied der beiden aufzufindenden Cluster agiert. Der eine Cluster, hier oben zu sehen, besteht aus vor allem Osteuropäischen Ländern sowie den Balkanstaaten. Der andere Cluster, hier unten zu sehen, besteht vor allem aus Süd und Westeuropäischen Ländern. Als größter Produzent ist hier Frankreich zu identifizieren.
+
+#### Asien
+
+```{r}
+layout = layout_with_graphopt(graph_AS)
+plot(simplify(graph_AS), edge.arrow.size = 0.2,layout = layout, main = "Asien")
+```
+
+In Asien gibt es keine wirklche Clusterbildung, man kann zwar erkennen das Israel der Hauptproduzent dieser Region ist, jedoch nicht mit astronomischem Abstand, die Türkei ist in diesem Netzwerk außerdem wichtig da sie viele Beziehungen mit anderen Nodes hat.
+
+#### Africa
+
+```{r}
+layout = layout_with_graphopt(graph_AF)
+plot(simplify(graph_AF), edge.arrow.size = 0.2,layout = layout, main = "Afrika")
+```
+
+In Afrika ensteht die Situation das keines der 3 Länder eine Beziehung hat, daraus kann man schließen das es keine Konstelationen von Ländern gibt wo das eine Land maximal 10 mal so viele weine Beiträgt wie das andere. Somit haben wir hier ein Netzwerk ohne Beziehungen.
+
+#### Süd Amerika
+
+```{r}
+layout = layout_with_graphopt(graph_SA)
+plot(simplify(graph_SA), edge.arrow.size = 0.2,layout = layout, main = "Süd Amerika")
+```
+
+In Südamerika kommt es zu einer interessanten Clusterbildung, die beiden Länder Chile und Argentinien haben eine Verbindung, die beiden Länder sind auch auf dem Weltmarkt durchaus wichtige Produzenten. Ein weiterer Cluster bilden die Länder: Peru, Uruguay und Brazilien, kleinere Lateinamerikanische Länder welche nicht besonders relevant sind auf dem Weltmarkt, jedoch lässt sich aus dem Netzwerk ablesen das sie ein Dreieck bilden, dass bedeutet das sie ungefähr alle gleich viele Weine zum Datensatz beitragen.
+
+#### Nord Amerika
+
+```{r}
+layout = layout_with_graphopt(graph_NA)
+plot(simplify(graph_NA), edge.arrow.size = 0.2,layout = layout, main = "Nord Amerika")
+```
+
+In Nord Amerika zeichnet sich ein zu erwartendes Bild ab, die USA stellen mit großem Abstand die meisten Weine, eine weitere Beziehung besteht zwar zwischen Mexico und Kanada, diese ist jedoch nicht von besonderer Bedeutung.
+
+#### Ozianien
+
 ```{r}
 layout = layout_with_graphopt(graph_OZ)
-plot(simplify(graph_OZ), edge.arrow.size = 0.2,layout = layout, main = "Ociania")
-
-layout = layout_with_graphopt(graph_AF)
-plot(simplify(graph_AF), edge.arrow.size = 0.2,layout = layout, main = "Africa")
-
-layout = layout_with_graphopt(graph_AS)
-plot(simplify(graph_AS), edge.arrow.size = 0.2,layout = layout, main = "Asia")
-
-layout = layout_with_graphopt(graph_NA)
-plot(simplify(graph_NA), edge.arrow.size = 0.2,layout = layout, main = "North America")
-
-layout = layout_with_graphopt(graph_EU)
-plot(simplify(graph_EU), edge.arrow.size = 0.2,layout = layout, main = "Europe")
-
-layout = layout_with_graphopt(graph_SA)
-plot(simplify(graph_SA), edge.arrow.size = 0.2,layout = layout, main = "South America")
+plot(simplify(graph_OZ), edge.arrow.size = 0.2,layout = layout, main = "Ozianien")
 ```
+
+Abschließend sehen wir in Ozianien, nur die Bindung zwischen Australien und Neuseeland. Diese beiden Länder sind die einzigen die im Datensatz vom Kontinent Ozianien vertreten sind. Überaschenderweise ist Australien verhältnismäßig klein da es nicht besonder viele Weine dem Datensatz stellt. Auf dem Weltmarkt jedoch ist Australien eine wichtige Exportnation.
+
+## Conclusio
+
+Abschließend lassen sich folgende Erfgebnisse festhalten:
+
+-   Die USA sind das Land welches die meisten weine im Datensatz stellen: 54504 (41.9%)
+
+-   England hat mit 91,581 Punkten den höchsten Punktedurchschnitt im Datensatz wobei die USA mit 0.0133 den geringsten Standartfehler aufweisen
+
+-   Das beste Punkte zu Preis Verhältnis hat die Ukraine mit 9,124, am schlechtesten schneidet die Schweiz mit 1,039 ab
+
+-   Nach analyse der vertretenden Nationen sowie der Weltweiten Produktion von Wein lässt sich feststellen das der Datensatz einen starken USA-Bias hat und vor allem Weine aus den USA enthält
+
+-   Australische Weine unterproprtional viel Bewertet und Portugisische überproportional viel.
+
+-   In Europa sind zwei Cluster zu erkennen im Bezug auf die ähnlichkeit der Anzahl der Weine
+
+    -   Cluster 1 besteht vor allem aus kleineren West & mitteleuropäischen Staaten sowei dem Balkan und Osteuropa
+
+    -   Cluster 2 besteht aus den Großen Süd, West und Mitteleuropäischen Ländern
+
+    -   Griechenland liegt als Bindeglied zwischen den beiden
+
+-   In Asien sind keine Cluster zu erkennen nur Israel und die Türkei spielen eine wichtige Rolle da sie verhältnismäßig viel Produzieren
+
+-   In Afrika existiert keine Verbindung zwischen den Ländern da sie alle zu sehr unterschiedliche mengen an Wein zum Datensatz beitragen
+
+-   in Süd Amerika existieren 2 Cluster:
+
+    -   Cluster 1 bestehend aus Argentienen und Chile, zwei auch weltweit bedeutende Weinexportnationen
+
+    -   Cluster 2 besteht aus Uruguay, Brazilien und Peru welche jeweils ähnlich viel beitragen aber aus weltweiter Perspektive eher unerheblich sind
+
+-   In Nordamerika ist nur die Dominanz der USA im Datensatz abzusehen sowie eine nicht besonders wichtige verbindung zwischen mexico und Kanada
+
+-   In Ozianien kann man nur die Verbindung zwischen Australien und Neuseeland sehen da diese Länder die einzigen beiden aus der Region sind die im Datensatz vertreten sind
+
+    -   Australien sollte aufgrund seiner wichtigen Rolle auf dem Weltmarkt eigentlich eine größere Menge an weinen Stellen
